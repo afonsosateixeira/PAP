@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root"; // Utilizador padrão do XAMPP
 $password = ""; // Sem palavra-passe por padrão
-$dbname = "notas_db";
+$dbname = "pap_db";
 
 // Criação da conexão
 $conn = new mysqli($host, $user, $password, $dbname);
