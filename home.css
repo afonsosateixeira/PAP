@@ -1,0 +1,49 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: rgb(247, 240, 240);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: rgb(226, 219, 219);
+}
+
+.btn_login {
+    padding:5px;
+    border: 1px solid gray;
+    border-radius: 20px;
+    background: transparent;
+    cursor: pointer;
+}
+
+h1{
+    position: absolute;
+    top: 35%;
+    left: 10%;
+}
+
+.start {
+    position: absolute;
+    top: 40%;
+    left: 20%;
+    padding: 10px;
+    border-radius: 20px;
+    width: 150px;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
