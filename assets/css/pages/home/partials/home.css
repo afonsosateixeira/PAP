@@ -16,13 +16,6 @@ header {
     background-color: rgb(226, 219, 219);
 }
 
-.btn_login {
-    padding:5px;
-    border: 1px solid gray;
-    border-radius: 20px;
-    background: transparent;
-    cursor: pointer;
-}
 
 h1{
     position: absolute;
