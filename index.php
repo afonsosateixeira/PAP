@@ -1,18 +1,33 @@
+<?php
+session_start(); // Inicia a sessão
+
+// Verifica se o usuário está autenticado
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php"); // Redireciona para o login se não estiver autenticado
+    exit();
+}
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina Inicial - SYNTA</title>
     <link rel="stylesheet" href="assets/css/pages/index/partials/index.css">
     <script src="assets/js/pages/index/index.js"></script>
-    <title>Notas</title>
 </head>
 <body>
+    <!-- Cabeçalho -->
+    <header>
+        <h1>Bem-vindo</h1>
+    </header>
 
+    <!-- Botão para adicionar nota e container de notas -->
     <button class="add-button" onclick="criarNota()">+ Nova Nota</button>
-    <div class="notas-container" id="notasContainer"></div>
+    <div class="notes-container" id="notesContainer"></div>
 
-    <!-- Modal -->
+    <!-- Modal para criar/editar notas -->
     <div id="modal-overlay" onclick="fecharModal()"></div>
     <div id="modal">
         <h3 id="modalTitle">Nova Nota</h3>
@@ -21,5 +36,6 @@
         <button onclick="salvarNota()">Salvar</button>
         <button onclick="fecharModal()">Cancelar</button>
     </div>
+    <a href="logout.php">Sair</a>
 </body>
 </html>

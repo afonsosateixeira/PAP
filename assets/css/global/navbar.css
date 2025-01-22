@@ -1,59 +1,65 @@
-body {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+body{
+    box-sizing: border-box;
     margin: 0;
-    font-family: Arial, sans-serif;
+    padding: 0;
+    background-color: #2d2f34;
+    font-family: "Poppins";
 }
 
-.navbar {
+li, a, button {
+    font-size: 18px;
+    color: #fff;
+    text-decoration: none;
+}
+
+header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
+    padding: 20px 15px;
+    background-color: #202022;
 }
 
-.logo {
-    flex: 1;
+.logotipo{
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
 }
 
-.logo-img {
-    height: 40px;
-}
-
-.nav-links {
-    display: flex;
+.nav-links{
     list-style: none;
-    margin: 0;
-    padding: 0;
-    flex: 2;
-    justify-content: center;
 }
 
-.nav-links li {
-    margin: 0 15px;
+.nav-links li{
+    display: inline-block;
+    padding: 0px 20px;
 }
 
-.nav-links a {
-    color: white;
-    text-decoration: none;
-    font-size: 18px;
+.nav-links li:hover{
+    color: #6090d7;
 }
 
-.nav-links a:hover {
-    text-decoration: underline;
-}
-
-.open-synta {
-    flex: 1;
-    background-color: #555;
-    color: white;
-    border: none;
+button{
     padding: 10px 20px;
-    font-size: 16px;
+    background-color: #4771b0;
+    border: none;
+    border-radius: 60px;
     cursor: pointer;
-    text-align: right;
 }
 
-.open-synta:hover {
-    background-color: #777;
+button:hover{
+    background-color: #39619c;
+}
+
+@media (max-widht: 800px){
+    li, a, button {
+        font-size: 12px;
+    }
+
+    .logotipo{
+        font-size: 22px;
+    }
+
 }
