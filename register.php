@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     
-    $stmt = $pdo->prepare("INSERT INTO login (name, email, password) VALUES (?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
     if ($stmt->execute([$name, $email, $password])) {
         echo "<script>alert('Conta criada com sucesso!'); window.location.href='login.php';</script>";
     } else {

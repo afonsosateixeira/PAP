@@ -64,7 +64,7 @@ $notes = $stmt->fetchAll();
 <?php echo file_get_contents('sidebar.html'); ?>
 
 <main>
-    <h1>Gerenciar Minhas Notas</h1>
+    <h1>Agendamento de notas</h1>
 
     <button id="create-note">Criar Nota</button>
 
