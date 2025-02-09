@@ -1,17 +1,23 @@
-/* Botão Criar Nota no canto inferior direito */
-#create-note-button {
+/* Botão Criar Nota */
+#create-note {
+    background-color: #2ecc71;  
+    color: white;
+    border: none;
+    padding: 16px 20px;  
+    border-radius: 50px;  
+    font-size: 20px;  
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #2ecc71;  /* Verde */
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    font-size: 30px;  /* Tamanho pequeno para o ícone */
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
     z-index: 1000;
+}
+
+#create-note:hover {
+    background-color: #27ae60;
+    transform: scale(1.1);
 }
 
 /* Estilos para o formulário de criação e edição */
@@ -20,21 +26,21 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);  /* Centraliza a janela */
+    transform: translate(-50%, -50%);
     background-color: #fff;
-    padding: 30px;
+    padding: 20px; 
     border-radius: 8px;
     width: 400px;
     max-width: 100%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
     font-family: Arial, sans-serif;
+    text-align: center; 
 }
 
 /* Estiliza os campos de texto */
 .note-form input, .note-form textarea {
-    width: 100%;
-    margin: 10px 0;
+    width: 90%; 
+    margin: 10px auto; 
+    display: block; 
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -43,7 +49,7 @@
 }
 
 .note-form input:focus, .note-form textarea:focus {
-    border-color: #2ecc71; /* Cor de foco */
+    border-color: #2ecc71;
     outline: none;
 }
 
@@ -51,57 +57,65 @@ textarea#note-content {
     height: 120px;
 }
 
-/* Estilos para os botões do formulário */
-button {
-    background-color: #2ecc71;  /* Verde */
-    color: white;
-    padding: 12px;
+/* Estilos específicos para cada botão */
+button{
     border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 16px;
-    margin-top: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
+    margin-right: 8px;
+    margin-top: 8px;
 }
 
-button[type="button"] {
-    background-color: #e74c3c;  /* Vermelho para Cancelar */
-}
-
-button#save-note, button#update-note {
-    background-color: #2ecc71;  /* Verde para Salvar/Atualizar */
-}
-
-button#save-note:hover, button#update-note:hover {
-    background-color: #27ae60; /* Verde mais escuro no hover */
-}
-
-/* Estilos para os botões de ação nas notas */
-.note-card-buttons button {
-    border-radius: 5px;
+/* Botão Salvar */
+#save-note {
+    background-color: #2ecc71;
+    color: white;
     padding: 8px 12px;
-    font-size: 14px;
+    border-radius: 5px;
+    width: 100%;
     cursor: pointer;
-    margin-left: 10px;
-    transition: background-color 0.3s ease;
 }
 
-/* Botão Editar (Amarelo) */
+#save-note:hover {
+    background-color: #27ae60;
+}
+
+/* Botão Cancelar */
+#cancel {
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+}
+
+#cancel:hover {
+    background-color: #c0392b;
+}
+
+/* Botão Editar */
 .btn-edit {
     background-color: #f39c12;
     color: white;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .btn-edit:hover {
     background-color: #e67e22;
 }
 
-/* Botão Eliminar (Vermelho) */
+/* Botão Excluir */
 .btn-delete {
     background-color: #e74c3c;
     color: white;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .btn-delete:hover {

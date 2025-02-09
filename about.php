@@ -6,6 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-<?php echo file_get_contents('navbar.html'); ?>
+<?php echo file_get_contents('navbar-home.html'); ?>
 </body>
 </html>

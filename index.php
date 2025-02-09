@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <!-- Incluir a sidebar -->
     <?php echo file_get_contents('sidebar.html'); ?>
-
+    
     <!-- Conteúdo da página -->
     <main>
         <h1>Bem-vindo à Dashboard</h1>

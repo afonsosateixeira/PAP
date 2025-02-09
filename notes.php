@@ -71,8 +71,7 @@ $notes = $stmt->fetchAll();
             <form id="note-form-action">
                 <input type="hidden" id="note-id" name="note_id">
                 <input type="text" id="note-title" name="title" placeholder="Título" required>
-                <textarea id="note-content" name="content" placeholder="Conteúdo" required></textarea>
-                <label>Data de Agendamento:</label>
+                <textarea id="note-content" name="content" placeholder="Conteúdo" required></textarea>             
                 <input type="datetime-local" id="note-date" name="schedule_date" required>
                 <button type="button" id="save-note">Salvar</button>
                 <button type="button" id="cancel">Cancelar</button>
