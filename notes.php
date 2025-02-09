@@ -55,110 +55,118 @@ $notes = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Notas</title>
-    <link rel="stylesheet" href=".css">
+    <link rel="stylesheet" href="assets/css/global/notes.css">
 </head>
 <body>
-<?php echo file_get_contents('sidebar.html'); ?>
+    <?php echo file_get_contents('sidebar.html'); ?>
 
-<main>
-    <h1>Agendamento de Notas</h1>
-    <button id="create-note">Criar Nota</button>
+    <main>
+        <h1>Agendamento de Notas</h1>
+        
+        <!-- Botão Criar Nota -->
+        <button id="create-note">+</button>
 
-    <div id="note-form" style="display: none;">
-        <form id="note-form-action">
-            <input type="hidden" id="note-id" name="note_id">
-            <input type="text" id="note-title" name="title" placeholder="Título" required>
-            <textarea id="note-content" name="content" placeholder="Conteúdo" required></textarea>
-            <label>Data de Agendamento:</label>
-            <input type="datetime-local" id="note-date" name="schedule_date" required>
-            <button type="button" id="save-note">Salvar</button>
-            <button type="button" id="cancel">Cancelar</button>
-        </form>
-    </div>
+        <!-- Formulário de Criação e Edição -->
+        <div id="note-form" class="note-form">
+            <form id="note-form-action">
+                <input type="hidden" id="note-id" name="note_id">
+                <input type="text" id="note-title" name="title" placeholder="Título" required>
+                <textarea id="note-content" name="content" placeholder="Conteúdo" required></textarea>
+                <label>Data de Agendamento:</label>
+                <input type="datetime-local" id="note-date" name="schedule_date" required>
+                <button type="button" id="save-note">Salvar</button>
+                <button type="button" id="cancel">Cancelar</button>
+            </form>
+        </div>
 
-    <div class="notes-container" id="notes-container">
-        <?php foreach ($notes as $note): ?>
-            <div class="note" id="note-<?= $note['id'] ?>">
-                <h3><?= htmlspecialchars($note['title']) ?></h3>
-                <p><?= nl2br(htmlspecialchars($note['content'])) ?></p>
-                <p><b>Data:</b> <?= htmlspecialchars($note['schedule_date']) ?></p>
-                <button class="edit-note" onclick="editNote(<?= $note['id'] ?>, '<?= htmlspecialchars($note['title']) ?>', '<?= htmlspecialchars($note['content']) ?>', '<?= htmlspecialchars($note['schedule_date']) ?>')">Editar</button>
-                <button class="delete-note" onclick="deleteNote(<?= $note['id'] ?>)">Excluir</button>
-            </div>
-        <?php endforeach; ?>
-    </div>
-</main>
+        <!-- Container de Notas -->
+        <div class="notes-container" id="notes-container">
+            <?php foreach ($notes as $note): ?>
+                <div class="note-card" id="note-<?= $note['id'] ?>">
+                    <h3><?= htmlspecialchars($note['title']) ?></h3>
+                    <p><?= nl2br(htmlspecialchars($note['content'])) ?></p>
+                    <p><b>Data:</b> <?= htmlspecialchars($note['schedule_date']) ?></p>
+                    <div class="note-card-buttons">
+                        <button class="btn-edit" onclick="editNote(<?= $note['id'] ?>, '<?= htmlspecialchars($note['title']) ?>', '<?= htmlspecialchars($note['content']) ?>', '<?= htmlspecialchars($note['schedule_date']) ?>')">Editar</button>
+                        <button class="btn-delete" onclick="deleteNote(<?= $note['id'] ?>)">Excluir</button>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </main>
 
-<script>
-document.getElementById('create-note').addEventListener('click', function() {
-    document.getElementById('note-form').style.display = 'block';
-    document.getElementById('note-id').value = '';
-    document.getElementById('note-title').value = '';
-    document.getElementById('note-content').value = '';
-    document.getElementById('note-date').value = '';
-    document.getElementById('save-note').textContent = 'Salvar';
-});
+    <script>
+    document.getElementById('create-note').addEventListener('click', function() {
+        document.getElementById('note-form').style.display = 'block'; // Exibe o formulário
+        document.getElementById('note-id').value = ''; // Limpa o id da nota
+        document.getElementById('note-title').value = ''; // Limpa o título
+        document.getElementById('note-content').value = ''; // Limpa o conteúdo
+        document.getElementById('note-date').value = ''; // Limpa a data
+        document.getElementById('save-note').textContent = 'Salvar'; // Muda o texto do botão
+    });
 
-document.getElementById('cancel').addEventListener('click', function() {
-    document.getElementById('note-form').style.display = 'none';
-});
+    document.getElementById('cancel').addEventListener('click', function() {
+        document.getElementById('note-form').style.display = 'none'; // Fecha o formulário
+    });
 
-document.getElementById('save-note').addEventListener('click', function() {
-    const title = document.getElementById('note-title').value;
-    const content = document.getElementById('note-content').value;
-    const scheduleDate = document.getElementById('note-date').value;
-    const noteId = document.getElementById('note-id').value;
+    document.getElementById('save-note').addEventListener('click', function() {
+        const title = document.getElementById('note-title').value;
+        const content = document.getElementById('note-content').value;
+        const scheduleDate = document.getElementById('note-date').value;
+        const noteId = document.getElementById('note-id').value;
 
-    if (title && content && scheduleDate) {
-        const data = new FormData();
-        data.append('title', title);
-        data.append('content', content);
-        data.append('schedule_date', scheduleDate);
-        if (noteId) {
-            data.append('note_id', noteId);
+        if (title && content && scheduleDate) {
+            const data = new FormData();
+            data.append('title', title);
+            data.append('content', content);
+            data.append('schedule_date', scheduleDate);
+            if (noteId) {
+                data.append('note_id', noteId); // Para editar uma nota existente
+            }
+
+            fetch('notes.php', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(note => {
+                if (note.success) {
+                    location.reload(); // Recarregar as notas
+                } else {
+                    alert('Erro ao salvar ou editar a nota');
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        } else {
+            alert('Preencha todos os campos!');
         }
+    });
 
-        fetch('notes.php', {
-            method: 'POST',
-            body: data
-        })
-        .then(response => response.json())
-        .then(note => {
-            if (note.success) {
-                location.reload();
-            } else {
-                alert('Erro ao salvar ou editar a nota');
-            }
-        })
-        .catch(error => console.error('Erro:', error));
-    } else {
-        alert('Preencha todos os campos!');
+    function editNote(noteId, title, content, scheduleDate) {
+        document.getElementById('note-form').style.display = 'block'; // Exibe o formulário de edição
+        document.getElementById('note-id').value = noteId;
+        document.getElementById('note-title').value = title;
+        document.getElementById('note-content').value = content;
+        document.getElementById('note-date').value = scheduleDate;
+        document.getElementById('save-note').textContent = 'Atualizar'; // Muda o botão para Atualizar
     }
-});
 
-function editNote(noteId, title, content, scheduleDate) {
-    document.getElementById('note-form').style.display = 'block';
-    document.getElementById('note-id').value = noteId;
-    document.getElementById('note-title').value = title;
-    document.getElementById('note-content').value = content;
-    document.getElementById('note-date').value = scheduleDate;
-    document.getElementById('save-note').textContent = 'Atualizar';
-}
-
-function deleteNote(noteId) {
-    if (confirm('Tem certeza que deseja excluir esta nota?')) {
-        fetch('notes.php?action=delete&id=' + noteId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Erro ao excluir a nota');
-            }
-        })
-        .catch(error => console.error('Erro:', error));
+    function deleteNote(noteId) {
+        if (confirm('Tem certeza que deseja excluir esta nota?')) {
+            fetch('notes.php?action=delete&id=' + noteId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Recarregar as notas
+                } else {
+                    alert('Erro ao excluir a nota');
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        }
     }
-}
-</script>
+    </script>
+
 </body>
 </html>
+

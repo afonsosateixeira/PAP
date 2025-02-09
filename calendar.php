@@ -52,7 +52,7 @@ if ($nextMonth == 13) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário</title>
-    <link rel="stylesheet" href="assets/css/global/calendar.css">
+    
 </head>
 <body>
 <?php echo file_get_contents('sidebar.html'); ?>

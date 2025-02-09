@@ -1,20 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="assets/css/global/sidebar.css">
+    <title>Dashboard</title>
+    <style>
+        /* Estilo básico para o corpo da página */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            transition: margin-left 0.3s;
+            background-color: #f4f4f4; /* Cor de fundo */
+        }
+
+        /* Sidebar fixa à esquerda */
+        #sidebar {
+            min-width: 230px;
+            max-width: 230px;
+            background-color: white;
+            transition: all 0.3s;
+            height: 100vh;
+            border-right: 1px solid #f2f2f2;
+            position: fixed;
+            z-index: 3;
+            left: -230px; /* A sidebar começa oculta */
+        }
+
+        #sidebar.active {
+            left: 0; /* A sidebar aparece quando ativa */
+        }
+
+        /* Estilo do logo da sidebar */
+        .menu-logo {
+            display: block;
+            background: white;
+            padding: 19px;
+            text-decoration: none;
+            font-size: 16px;
+            text-align: center;
+            border-bottom: 2px solid #f2f2f2;
+            font-weight: bold;
+            color: #04aa6d;
+        }
+
+        /* Estilo dos itens do menu da sidebar */
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: gray;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        .menu-item:hover {
+            background: #f7f7f7;
+        }
+
+        /* Botão de menu pequeno no canto superior esquerdo */
+        #menuBtn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            position: absolute;
+            top: 10px;
+            left: 10px; /* Posicionando no canto superior esquerdo */
+            z-index: 4; /* Ficar acima de tudo */
+            background-color: #04aa6d;
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Estilo para o conteúdo da página */
+        .page-content {
+            display: none; /* Inicialmente escondido */
+            transition: margin-left 0.3s;
+            padding: 20px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 580px) {
+            #sidebar {
+                position: absolute;
+                z-index: 2;
+                width: 100%;
+            }
+
+            .overlay {
+                background-color: rgba(0, 0, 0, 0.5);
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 1;
+            }
+
+            .overlay.hidden {
+                display: none;
+            }
+
+            /* Quando a sidebar estiver ativa, o conteúdo vai se mover */
+            body.sidebar-active .page-content {
+                display: block; /* Exibe o conteúdo */
+                margin-left: 230px; /* Ajuste do conteúdo para a direita */
+            }
+
+            body.sidebar-active #menuBtn {
+                position: absolute;
+                top: 10px;
+                left: 250px; /* Posiciona o botão dentro da sidebar */
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="sidebar">
-        <ul>
-            <li><a href="index.php">Perfil</a></li>
-            <li><a href="notes.php">Agendamento</a></li>
-            <li><a href="calendar.php">Calendário</a></li>
-            <li><a href="logout.php">Sair</a></li>
-            
-        </ul>
+    <!-- BOTÃO PARA ABRIR A SIDEBAR -->
+    <div id="menuBtn" class="menu-btn">
+        &#9776; <!-- Símbolo do menu hamburguer -->
     </div>
+
+    <!-- MENU LATERAL -->
+    <div class="left-sidebar" id="sidebar">
+        <!-- LOGO DO TOPO -->
+        <a class="menu-logo" href="#">
+            <i class="mdi mdi-code-not-equal-variant"></i>
+            ABC Front
+        </a>
+        <!-- CONTEUDO DO CENTRO DO MENU -->
+        <div class="conteudo-sidebar">
+            <a class="menu-item" href="index.php">Perfil</a>
+            <a class="menu-item" href="notes.php">Agendamento</a>
+            <a class="menu-item" href="calendar.php">Calendário</a>
+            <a class="menu-item" href="logout.php">Sair</a>
+        </div>
+    </div>
+
+    <!-- OVERLAY MOBILE -->
+    <div class="overlay hidden" id="overlay"></div>
+
+    <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
+    <div class="page-content">
+        <h1>Conteúdo da Página</h1>
+        <p>Este é o conteúdo principal que se ajustará conforme a sidebar é ativada ou desativada.</p>
+    </div>
+
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("overlay");
+        const body = document.body;
+
+        // Toggle de exibição do menu
+        menuBtn.onclick = function () {
+            sidebar.classList.toggle("active");
+            overlay.classList.toggle("hidden");
+            body.classList.toggle("sidebar-active");
+        };
+
+        // Fechar a sidebar clicando no overlay
+        overlay.onclick = function () {
+            overlay.classList.toggle("hidden");
+            sidebar.classList.toggle("active");
+            body.classList.toggle("sidebar-active");
+        };
+    </script>
 </body>
 </html>

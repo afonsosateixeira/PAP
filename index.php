@@ -15,8 +15,10 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-<?php echo file_get_contents('sidebar.html'); ?>
+    <!-- Incluir a sidebar -->
+    <?php echo file_get_contents('sidebar.html'); ?>
 
+    <!-- Conteúdo da página -->
     <main>
         <h1>Bem-vindo à Dashboard</h1>
         <p>Escolha uma opção na barra lateral para começar.</p>
