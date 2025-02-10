@@ -50,7 +50,172 @@ if ($nextMonth == 13) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário</title>
-    <link rel="stylesheet" href="assets/css/global/calendar.css"> <!-- O seu CSS que será utilizado em todo o site -->
+    <style>
+        /* Estilos gerais */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9fafb;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Título do Calendário */
+h1 {
+    font-size: 24px;
+    margin: 20px 0;
+    text-align: center;
+    color: #333;
+}
+
+/* Estilos para o calendário */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin: 0 20px;
+    max-width: 800px; /* Limita o tamanho do calendário */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.day-header {
+    font-weight: bold;
+    padding: 12px;
+    background-color: #71b9f0;
+    color: white;
+    border-radius: 8px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.day {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 100px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.day:hover {
+    background-color: #e3e9f7;
+}
+
+.day strong {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Notas */
+.note {
+    background-color: #f39c12;
+    color: white;
+    padding: 6px;
+    margin-top: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.note:hover {
+    background-color: #e67e22;
+}
+
+/* Estilo para os botões de navegação */
+#view-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#view-buttons a {
+    background-color: #2ecc71;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 0 10px;
+    transition: background-color 0.3s ease;
+}
+
+#view-buttons a:hover {
+    background-color: #27ae60;
+}
+
+/* Estilos do modal */
+#noteModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+#noteModal .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+    max-width: 80%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+#noteModal .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: #333;
+    cursor: pointer;
+}
+
+#note-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+#note-content {
+    font-size: 16px;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+#note-schedule-date {
+    font-size: 14px;
+    color: #71b9f0;
+    margin-top: 10px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .calendar {
+        width: 100%;
+        margin: 0 10px;
+    }
+
+    #noteModal .modal-content {
+        width: 90%;
+    }
+
+    #view-buttons a {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+}
+
+    </style>
 </head>
 <body>
     <?php echo file_get_contents('sidebar.html'); ?> <!-- Inclusão da barra lateral -->

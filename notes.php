@@ -58,7 +58,7 @@ $notes = $stmt->fetchAll();
     <link rel="stylesheet" href="assets/css/global/notes.css">
 </head>
 <body>
-    <?php echo file_get_contents('sidebar.html'); ?>
+    <?php include 'sidebar.html'; ?>
 
     <main>
         <h1>Agendamento de Notas</h1>

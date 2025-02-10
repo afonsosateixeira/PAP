@@ -6,6 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-<?php echo file_get_contents('navbar-home.html'); ?>
+<?php include 'navbar.html'; ?>
 </body>
 </html>

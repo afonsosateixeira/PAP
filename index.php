@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+// Verificar se o usuário está autenticado
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -12,12 +14,12 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/global/style.css">
 </head>
 <body>
     <!-- Incluir a sidebar -->
-    <?php echo file_get_contents('sidebar.html'); ?>
-    
+    <?php include 'sidebar.html'; ?>
+
     <!-- Conteúdo da página -->
     <main>
         <h1>Bem-vindo à Dashboard</h1>
