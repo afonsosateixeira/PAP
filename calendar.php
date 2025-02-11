@@ -148,7 +148,7 @@ h1 {
     background-color: #27ae60;
 }
 
-/* Estilos do modal */
+/* Estilos para o modal */
 #noteModal {
     display: none;
     position: fixed;
@@ -156,28 +156,38 @@ h1 {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.4); /* Cor de fundo escura e suave */
     z-index: 1000;
     justify-content: center;
     align-items: center;
+    transition: opacity 0.3s ease; /* Transição suave */
 }
 
 #noteModal .modal-content {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    width: 350px;
-    max-width: 80%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    border-radius: 12px; /* Borda arredondada para suavizar o visual */
+    padding: 15px;
+    width: 300px; /* Largura reduzida */
+    max-width: 90%;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    transform: scale(0.8); /* Inicia o modal em tamanho menor */
+    transition: transform 0.3s ease-in-out; /* Animação de escalonamento */
+}
+
+#noteModal .modal-content.show {
+    transform: scale(1); /* Expande para o tamanho normal */
 }
 
 #noteModal .close {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 20px;
+    font-size: 22px;
     color: #333;
     cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 0;
 }
 
 #note-title {
@@ -189,14 +199,16 @@ h1 {
 #note-content {
     font-size: 16px;
     margin-top: 10px;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 #note-schedule-date {
     font-size: 14px;
     color: #71b9f0;
     margin-top: 10px;
+    font-style: italic;
 }
+
 
 /* Responsividade */
 @media (max-width: 768px) {
@@ -272,25 +284,33 @@ h1 {
 
     <script>
         // Função para exibir o modal com os detalhes da nota
-        function showNoteDetails(title, content, scheduleDate) {
-            document.getElementById('note-title').innerText = title;
-            document.getElementById('note-content').innerText = content;
-            document.getElementById('note-schedule-date').innerText = "Agendado para: " + scheduleDate;
-            document.getElementById('noteModal').style.display = 'flex'; // Exibe o modal centralizado
-        }
+function showNoteDetails(title, content, scheduleDate) {
+    document.getElementById('note-title').innerText = title;
+    document.getElementById('note-content').innerText = content;
+    document.getElementById('note-schedule-date').innerText = "Agendado para: " + scheduleDate;
+    let modal = document.getElementById('noteModal');
+    modal.style.display = 'flex'; // Exibe o modal centralizado
+    setTimeout(function() {
+        modal.querySelector('.modal-content').classList.add('show'); // Aplica a animação de escala
+    }, 50);
+}
 
-        // Função para fechar o modal
-        function closeModal() {
-            document.getElementById('noteModal').style.display = 'none'; // Fecha o modal
-        }
+// Função para fechar o modal
+function closeModal() {
+    let modal = document.getElementById('noteModal');
+    modal.querySelector('.modal-content').classList.remove('show'); // Remove a animação de escala
+    setTimeout(function() {
+        modal.style.display = 'none'; // Fecha o modal após a animação
+    }, 300);
+}
 
-        // Fechar o modal quando clicar fora da área do modal
-        window.onclick = function(event) {
-            let modal = document.getElementById('noteModal');
-            if (event.target == modal) {
-                closeModal(); // Fecha o modal se o clique for fora da área do modal
-            }
-        }
+// Fechar o modal quando clicar fora da área do modal
+window.onclick = function(event) {
+    let modal = document.getElementById('noteModal');
+    if (event.target == modal) {
+        closeModal(); // Fecha o modal se o clique for fora da área do modal
+    }
+}
     </script>
 
 </body>

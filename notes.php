@@ -62,7 +62,7 @@ $notes = $stmt->fetchAll();
 
     <main>
         <h1>Agendamento de Notas</h1>
-        
+        <?php include 'searchbar.html'; ?>
         <!-- Botão Criar Nota -->
         <button id="create-note">+</button>
 
@@ -168,4 +168,3 @@ $notes = $stmt->fetchAll();
 
 </body>
 </html>
-
