@@ -61,7 +61,7 @@
     }
     
     .filter-dropdown select {
-        width: 100%;
+        width: calc(100% - 110px);
         padding: 5px;
         font-size: 16px;
     }
@@ -77,12 +77,8 @@
             </button>
             <div class="filter-dropdown" id="filter-dropdown">
                 <label for="category-filter">Escolha a categoria:</label>
-                <select id="category-filter">
-                    <option value="all">Todas</option>
-                    <option value="trabalho">Trabalho</option>
-                    <option value="pessoal">Pessoal</option>
-                    <option value="outros">Outros</option>
-                </select>
+                <select id="category-filter"></select>
+                
             </div>
         </div>
     </div>
@@ -105,19 +101,6 @@
         document.getElementById('filter-btn').addEventListener('click', function () {
             let dropdown = document.getElementById('filter-dropdown');
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
-        
-        document.getElementById('category-filter').addEventListener('change', function () {
-            let category = this.value;
-            let notes = document.querySelectorAll('.note-card');
-            
-            notes.forEach(note => {
-                if (category === 'all' || note.dataset.category === category) {
-                    note.style.display = '';
-                } else {
-                    note.style.display = 'none';
-                }
-            });
         });
     </script>
 </body>

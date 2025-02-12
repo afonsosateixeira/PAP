@@ -27,6 +27,26 @@ CREATE TABLE sessions (
 );
 
 
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    color VARCHAR(7) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Alterando a tabela de notas para incluir a categoria
+ALTER TABLE notes ADD COLUMN category_id INT NULL;
+ALTER TABLE notes ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL;
+
+
+
+
+
+
+
+
+
 
 
 

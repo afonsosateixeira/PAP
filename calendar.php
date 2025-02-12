@@ -19,8 +19,15 @@ $daysInMonth = date('t', $firstDayOfMonth);
 $startDay = date('N', $firstDayOfMonth);
 
 // Obter as notas agendadas para o mês e ano selecionados
-$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date, schedule_date FROM notes WHERE user_id = ? AND MONTH(schedule_date) = ? AND YEAR(schedule_date) = ?");
+$stmt = $pdo->prepare("
+    SELECT id, title, content, DATE(schedule_date) as date, schedule_date 
+    FROM notes 
+    WHERE user_id = ? 
+    AND MONTH(schedule_date) = ? 
+    AND YEAR(schedule_date) = ?
+");
 $stmt->execute([$user_id, $month, $year]);
+
 $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $notesByDate = [];
 foreach ($notes as $note) {
@@ -236,9 +243,10 @@ h1 {
         <h1>Calendário de <?= date('F Y', $firstDayOfMonth) ?></h1>
 
         <div id="view-buttons">
-            <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>">&#9664; Mês Anterior</a>
-            <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>">Próximo Mês &#9654;</a>
-        </div>
+    <a href="calendar.php?month=<?= $prevMonth ?>&year=<?= $prevYear ?>">&#9664; Mês Anterior</a>
+    <a href="calendar.php?month=<?= $nextMonth ?>&year=<?= $nextYear ?>">Próximo Mês &#9654;</a>
+</div>
+
 
         <div class="calendar">
             <div class="day-header">Dom</div>
