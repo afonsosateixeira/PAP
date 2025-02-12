@@ -12,15 +12,17 @@ $user_id = $_SESSION['user_id'];
 $month = isset($_GET['month']) ? (int)$_GET['month'] : date('m');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 
-// Calcular a primeira data do mês para gerar o calendário
-$firstDayOfMonth = strtotime("$year-$month-01");
-$daysInMonth = date('t', $firstDayOfMonth);
-$startDay = date('N', $firstDayOfMonth);
+// Definir o intervalo de datas para o mês selecionado
+$startDate = "$year-$month-01";
+$endDate = date("Y-m-t", strtotime($startDate));
 
 // Obter as notas agendadas para o mês e ano selecionados
-$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date, schedule_date FROM notes WHERE user_id = ? AND MONTH(schedule_date) = ? AND YEAR(schedule_date) = ?");
-$stmt->execute([$user_id, $month, $year]);
+$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date, schedule_date 
+                       FROM notes 
+                       WHERE user_id = ? AND schedule_date BETWEEN ? AND ?");
+$stmt->execute([$user_id, $startDate, $endDate]);
 $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 $notesByDate = [];
 foreach ($notes as $note) {
     // Associar cada nota à data correspondente
@@ -157,69 +159,86 @@ foreach ($notes as $note) {
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const calendar = document.querySelector("#calendar");
-            const todayBtn = document.getElementById("today");
-            const prevBtn = document.getElementById("prev");
-            const nextBtn = document.getElementById("next");
-            let currentDate = new Date();
+    document.addEventListener("DOMContentLoaded", function () {
+        const calendar = document.querySelector("#calendar");
+        const todayBtn = document.getElementById("today");
+        const prevBtn = document.getElementById("prev");
+        const nextBtn = document.getElementById("next");
+        let currentDate = new Date();
 
-            // Passar as notas para o JavaScript
-            const notesByDate = <?php echo json_encode($notesByDate); ?>;
+        function fetchNotes(year, month) {
+            return fetch(`fetch_notes.php?year=${year}&month=${month}`)
+                .then(response => response.json())
+                .then(notes => {
+                    let notesByDate = {};
+                    notes.forEach(note => {
+                        if (!notesByDate[note.date]) {
+                            notesByDate[note.date] = [];
+                        }
+                        notesByDate[note.date].push(note);
+                    });
+                    return notesByDate;
+                });
+        }
 
-            function renderCalendar(date) {
-                calendar.innerHTML = 
-                    `<div class='day-header'>Dom</div>
-                    <div class='day-header'>Seg</div>
-                    <div class='day-header'>Ter</div>
-                    <div class='day-header'>Qua</div>
-                    <div class='day-header'>Qui</div>
-                    <div class='day-header'>Sex</div>
-                    <div class='day-header'>Sáb</div>`;
+        function renderCalendar(date, notesByDate = {}) {
+            calendar.innerHTML = 
+                `<div class='day-header'>Dom</div>
+                <div class='day-header'>Seg</div>
+                <div class='day-header'>Ter</div>
+                <div class='day-header'>Qua</div>
+                <div class='day-header'>Qui</div>
+                <div class='day-header'>Sex</div>
+                <div class='day-header'>Sáb</div>`;
 
-                let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-                let daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+            let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+            let daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
-                // Preencher os espaços vazios antes do primeiro dia
-                for (let i = 0; i < firstDay; i++) {
-                    calendar.innerHTML += `<div class='day'></div>`;
-                }
-
-                // Preencher os dias com notas
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    let notesHTML = '';
-
-                    if (notesByDate[formattedDate]) {
-                        notesByDate[formattedDate].forEach(note => {
-                            notesHTML += `<div class="note">${note.title}</div>`;
-                        });
-                    }
-
-                    calendar.innerHTML += `<div class='day'>
-                        <strong>${day}</strong>
-                        ${notesHTML}
-                    </div>`;
-                }
+            for (let i = 0; i < firstDay; i++) {
+                calendar.innerHTML += `<div class='day'></div>`;
             }
 
-            todayBtn.addEventListener("click", function () {
-                currentDate = new Date();
-                renderCalendar(currentDate);
-            });
+            for (let day = 1; day <= daysInMonth; day++) {
+                const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                let notesHTML = '';
 
-            prevBtn.addEventListener("click", function () {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar(currentDate);
-            });
+                if (notesByDate[formattedDate]) {
+                    notesByDate[formattedDate].forEach(note => {
+                        notesHTML += `<div class="note">${note.title}</div>`;
+                    });
+                }
 
-            nextBtn.addEventListener("click", function () {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar(currentDate);
-            });
+                calendar.innerHTML += `<div class='day'>
+                    <strong>${day}</strong>
+                    ${notesHTML}
+                </div>`;
+            }
+        }
 
-            renderCalendar(currentDate);
+        function updateCalendar() {
+            fetchNotes(currentDate.getFullYear(), currentDate.getMonth() + 1).then(notesByDate => {
+                renderCalendar(currentDate, notesByDate);
+            });
+        }
+
+        todayBtn.addEventListener("click", function () {
+            currentDate = new Date();
+            updateCalendar();
         });
-    </script>
+
+        prevBtn.addEventListener("click", function () {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendar();
+        });
+
+        nextBtn.addEventListener("click", function () {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendar();
+        });
+
+        updateCalendar();
+    });
+</script>
+
 </body>
 </html>
