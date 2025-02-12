@@ -62,17 +62,188 @@ $notes = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Notas</title>
-    <link rel="stylesheet" href="assets/css/global/notes.css">
+    <style>
+
+#main-content {
+            flex-grow: 1;
+            margin-left: 82px;
+            padding: 20px;
+            width: calc(100% - 82px);
+        }
+        /* Botão Criar Nota */
+#create-note {  
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    margin: 20px;
+    display: block;
+}
+
+#create-note:hover {
+    background-color: #27ae60;
+}
+
+/* Estilos para o formulário de criação e edição */
+.note-form {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px; 
+    border-radius: 8px;
+    width: 400px;
+    max-width: 100%;
+    font-family: Arial, sans-serif;
+    text-align: center; 
+}
+
+/* Estiliza os campos de texto */
+.note-form input, .note-form textarea {
+    width: 90%; 
+    margin: 10px auto; 
+    display: block; 
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+.note-form input:focus, .note-form textarea:focus {
+    border-color: #2ecc71;
+    outline: none;
+}
+
+textarea#note-content {
+    height: 120px;
+}
+
+/* Estilos específicos para cada botão */
+button{
+    border: none;
+    margin-right: 8px;
+    margin-top: 8px;
+}
+
+/* Botão Salvar */
+#save-note {
+    background-color: #2ecc71;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+}
+
+#save-note:hover {
+    background-color: #27ae60;
+}
+
+/* Botão Cancelar */
+#cancel {
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+}
+
+#cancel:hover {
+    background-color: #c0392b;
+}
+
+/* Botão Editar */
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit:hover {
+    background-color: #e67e22;
+}
+
+/* Botão Excluir */
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+/* Estilos para a container de notas */
+.notes-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 40px;
+}
+
+/* Estilos do card de nota */
+.note-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.note-card:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.note-card h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.note-card p {
+    font-size: 14px;
+    color: #666;
+}
+
+.note-card-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.buttons-container {
+    display: flex;
+    align-items: center;
+}
+
+    </style>
 </head>
 <body>
     <?php include 'sidebar.html'; ?>
 
     <main>
+    <div id="main-content">
         <h1>Agendamento de Notas</h1>
-        <?php include 'category.php'; ?>
+        <div class="buttons-container">
+            <button id="create-note">Criar nota</button>
+            <?php include 'category.php'; ?>
+        </div>
         <?php include 'searchbar.php'; ?>
-        <!-- Botão Criar Nota -->
-        <button id="create-note">+</button>
 
         <!-- Formulário de Criação e Edição -->
         <div id="note-form" class="note-form">
@@ -120,6 +291,7 @@ $notes = $stmt->fetchAll();
                     </div>
                 </div>
             <?php endforeach; ?>
+        </div>
         </div>
 
     </main>

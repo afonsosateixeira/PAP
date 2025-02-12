@@ -15,9 +15,7 @@ $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 $startDate = "$year-$month-01";
 $endDate = date("Y-m-t", strtotime($startDate));
 
-$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date 
-                       FROM notes 
-                       WHERE user_id = ? AND schedule_date BETWEEN ? AND ?");
+$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date FROM notes WHERE user_id = ? AND schedule_date BETWEEN ? AND ?");
 $stmt->execute([$user_id, $startDate, $endDate]);
 $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

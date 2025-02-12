@@ -14,7 +14,14 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="assets/css/global/style.css">
+    <style>
+                #main-content {
+            flex-grow: 1;
+            margin-left: 82px;
+            padding: 20px;
+            width: calc(100% - 82px);
+        }
+    </style>
 </head>
 <body>
     <!-- Incluir a sidebar -->
@@ -22,8 +29,10 @@ if (!isset($_SESSION['user_id'])) {
 
     <!-- Conteúdo da página -->
     <main>
-        <h1>Bem-vindo à Dashboard</h1>
-        <p>Escolha uma opção na barra lateral para começar.</p>
+        <div id="main-content">
+            <h1>Bem-vindo à Dashboard</h1>
+            <p>Escolha uma opção na barra lateral para começar.</p>
+        </div>
     </main>
 
     <script src="assets/js/scripts.js"></script>

@@ -17,9 +17,7 @@ $startDate = "$year-$month-01";
 $endDate = date("Y-m-t", strtotime($startDate));
 
 // Obter as notas agendadas para o mês e ano selecionados
-$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date, schedule_date 
-                       FROM notes 
-                       WHERE user_id = ? AND schedule_date BETWEEN ? AND ?");
+$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date, schedule_date FROM notes WHERE user_id = ? AND schedule_date BETWEEN ? AND ?");
 $stmt->execute([$user_id, $startDate, $endDate]);
 $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -38,27 +36,6 @@ foreach ($notes as $note) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário Simples</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        body {
-            display: flex;
-            min-height: 100vh;
-            background-color: #e3e9f7;
-        }
-        #sidebar {
-            min-width: 82px;
-            background: #ffffff;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 10;
-            transition: all .3s;
-        }
         #main-content {
             flex-grow: 1;
             margin-left: 82px;
@@ -81,7 +58,7 @@ foreach ($notes as $note) {
         #button-calendar button, #view-mode {
             padding: 8px 12px;
             border: none;
-            background: #007BFF;
+            background: #71b9f0;
             color: white;
             cursor: pointer;
             border-radius: 5px;
@@ -110,7 +87,7 @@ foreach ($notes as $note) {
         }
         .day-header {
             font-weight: bold;
-            background: #007BFF;
+            background: #71b9f0;
             color: white;
             padding: 10px;
         }
