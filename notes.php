@@ -52,8 +52,6 @@ $user_id = $_SESSION['user_id'];
 $stmt = $pdo->prepare("SELECT * FROM notes WHERE user_id = ? ORDER BY created_at DESC");
 $stmt->execute([$user_id]);
 $notes = $stmt->fetchAll();
-
-
 ?>
 
 <!DOCTYPE html>
@@ -102,7 +100,7 @@ $notes = $stmt->fetchAll();
 }
 
 /* Estiliza os campos de texto */
-.note-form input, .note-form textarea {
+.note-form input, textarea, select {
     width: 90%; 
     margin: 10px auto; 
     display: block; 
@@ -113,7 +111,7 @@ $notes = $stmt->fetchAll();
     transition: border 0.3s ease;
 }
 
-.note-form input:focus, .note-form textarea:focus {
+.note-form input:focus, textarea:focus, select:focus {
     border-color: #2ecc71;
     outline: none;
 }
@@ -270,26 +268,25 @@ button{
         <!-- Container de Notas -->
         <div class="notes-container" id="notes-container">
             <?php foreach ($notes as $note): ?>
-                <div class="note-card" id="note-<?= $note['id'] ?>">
-                    <h3><?= htmlspecialchars($note['title']) ?></h3>
-                    <p><?= nl2br(htmlspecialchars($note['content'])) ?></p>
-                    <p><b>Data:</b> <?= htmlspecialchars($note['schedule_date']) ?></p>
-                    <!-- Exibir Categoria -->
-                    <p><b>Categoria:</b>
-                        <?php
-                        // Obter a categoria associada à nota
-                        $stmt = $pdo->prepare("SELECT name FROM categories WHERE id = ? AND user_id = ?");
-                        $stmt->execute([$note['category_id'], $_SESSION['user_id']]);
-                        $category = $stmt->fetch();
-                        echo htmlspecialchars($category['name'] ?? 'Sem Categoria');
-                        ?>
-                    </p>
+                <div class="note-card" id="note-<?= $note['id'] ?>" data-category="<?= $note['category_id'] ?>">
+    <h3><?= htmlspecialchars($note['title']) ?></h3>
+    <p><?= nl2br(htmlspecialchars($note['content'])) ?></p>
+    <p><b>Data:</b> <?= htmlspecialchars($note['schedule_date']) ?></p>
+    <p><b>Categoria:</b>
+        <?php
+        // Obter a categoria associada à nota
+        $stmt = $pdo->prepare("SELECT name FROM categories WHERE id = ? AND user_id = ?");
+        $stmt->execute([$note['category_id'], $_SESSION['user_id']]);
+        $category = $stmt->fetch();
+        echo htmlspecialchars($category['name'] ?? 'Sem Categoria');
+        ?>
+    </p>
+    <div class="note-card-buttons">
+        <button class="btn-edit" onclick="editNote(<?= $note['id'] ?>, '<?= htmlspecialchars($note['title']) ?>', '<?= htmlspecialchars($note['content']) ?>', '<?= htmlspecialchars($note['schedule_date']) ?>', <?= $note['category_id'] ?>)">Editar</button>
+        <button class="btn-delete" onclick="deleteNote(<?= $note['id'] ?>)">Excluir</button>
+    </div>
+</div>
 
-                    <div class="note-card-buttons">
-                        <button class="btn-edit" onclick="editNote(<?= $note['id'] ?>, '<?= htmlspecialchars($note['title']) ?>', '<?= htmlspecialchars($note['content']) ?>', '<?= htmlspecialchars($note['schedule_date']) ?>', <?= $note['category_id'] ?>)">Editar</button>
-                        <button class="btn-delete" onclick="deleteNote(<?= $note['id'] ?>)">Excluir</button>
-                    </div>
-                </div>
             <?php endforeach; ?>
         </div>
         </div>
@@ -311,39 +308,40 @@ button{
     });
 
     document.getElementById('save-note').addEventListener('click', function() {
-        const title = document.getElementById('note-title').value;
-        const content = document.getElementById('note-content').value;
-        const scheduleDate = document.getElementById('note-date').value;
-        const noteId = document.getElementById('note-id').value;
-        const categoryId = document.getElementById('note-category').value; // Obtém o ID da categoria selecionada
+    const title = document.getElementById('note-title').value;
+    const content = document.getElementById('note-content').value;
+    const scheduleDate = document.getElementById('note-date').value;
+    const noteId = document.getElementById('note-id').value;
+    const categoryId = document.getElementById('note-category').value;
 
-        if (title && content && scheduleDate) {
-            const data = new FormData();
-            data.append('title', title);
-            data.append('content', content);
-            data.append('schedule_date', scheduleDate);
-            data.append('category_id', categoryId); // Adiciona o ID da categoria ao FormData
-            if (noteId) {
-                data.append('note_id', noteId); // Para editar uma nota existente
-            }
-
-            fetch('notes.php', {
-                method: 'POST',
-                body: data
-            })
-            .then(response => response.json())
-            .then(note => {
-                if (note.success) {
-                    location.reload(); // Recarregar as notas
-                } else {
-                    alert('Erro ao salvar ou editar a nota');
-                }
-            })
-            .catch(error => console.error('Erro:', error));
-        } else {
-            alert('Preencha todos os campos!');
+    if (title && content && scheduleDate) {
+        const data = new FormData();
+        data.append('title', title);
+        data.append('content', content);
+        data.append('schedule_date', scheduleDate);
+        data.append('category_id', categoryId);
+        if (noteId) {
+            data.append('note_id', noteId);
         }
-    });
+
+        fetch('notes.php', {
+            method: 'POST',
+            body: data
+        })
+        .then(response => response.json())
+        .then(note => {
+            if (note.success) {
+                location.reload(); // Reload the page to show updated notes
+            } else {
+                alert('Erro ao salvar ou editar a nota');
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    } else {
+        alert('Preencha todos os campos!');
+    }
+});
+
 
     function editNote(noteId, title, content, scheduleDate, categoryId) {
         document.getElementById('note-form').style.display = 'block'; // Exibe o formulário de edição

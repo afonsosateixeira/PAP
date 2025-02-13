@@ -92,15 +92,20 @@ foreach ($notes as $note) {
             padding: 10px;
         }
         .note {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background-color: #f39c12;
-            color: white;
-            padding: 6px;
-            font-size: 12px;
-            border-radius: 4px;
-        }
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+    padding: 6px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+
+.note[data-no-category="true"] {
+    background-color: #D3D3D3; /* Cinza claro para notas sem categoria */
+}
+
     </style>
 </head>
 <body>
@@ -113,6 +118,7 @@ foreach ($notes as $note) {
                     <button id="prev">◀</button>
                     <button id="today">Hoje</button>
                     <button id="next">▶</button>
+                    <span id="current-month"></span>
                 </div>
             </div>
             <div id="nav-right">
@@ -136,85 +142,106 @@ foreach ($notes as $note) {
     </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const calendar = document.querySelector("#calendar");
-        const todayBtn = document.getElementById("today");
-        const prevBtn = document.getElementById("prev");
-        const nextBtn = document.getElementById("next");
-        let currentDate = new Date();
+   document.addEventListener("DOMContentLoaded", function () {
+    const calendar = document.querySelector("#calendar");
+    const todayBtn = document.getElementById("today");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+    const monthLabel = document.getElementById("current-month");
+    let currentDate = new Date();
 
-        function fetchNotes(year, month) {
-            return fetch(`fetch_notes.php?year=${year}&month=${month}`)
-                .then(response => response.json())
-                .then(notes => {
-                    let notesByDate = {};
-                    notes.forEach(note => {
-                        if (!notesByDate[note.date]) {
-                            notesByDate[note.date] = [];
-                        }
-                        notesByDate[note.date].push(note);
-                    });
-                    return notesByDate;
-                });
-        }
+    function updateMonthLabel() {
+    const monthNames = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+    monthLabel.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+}
 
-        function renderCalendar(date, notesByDate = {}) {
-            calendar.innerHTML = 
-                `<div class='day-header'>Dom</div>
-                <div class='day-header'>Seg</div>
-                <div class='day-header'>Ter</div>
-                <div class='day-header'>Qua</div>
-                <div class='day-header'>Qui</div>
-                <div class='day-header'>Sex</div>
-                <div class='day-header'>Sáb</div>`;
 
-            let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-            let daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-
-            for (let i = 0; i < firstDay; i++) {
-                calendar.innerHTML += `<div class='day'></div>`;
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let notesHTML = '';
-
-                if (notesByDate[formattedDate]) {
-                    notesByDate[formattedDate].forEach(note => {
-                        notesHTML += `<div class="note">${note.title}</div>`;
-                    });
+function fetchNotes(year, month) {
+    return fetch(`fetch_notes.php?year=${year}&month=${month}`)
+        .then(response => response.json())
+        .then(notes => {
+            let notesByDate = {};
+            notes.forEach(note => {
+                if (!notesByDate[note.date]) {
+                    notesByDate[note.date] = [];
                 }
+                notesByDate[note.date].push(note);
+            });
+            return notesByDate;
+        });
+}
 
-                calendar.innerHTML += `<div class='day'>
-                    <strong>${day}</strong>
-                    ${notesHTML}
-                </div>`;
-            }
-        }
 
-        function updateCalendar() {
-            fetchNotes(currentDate.getFullYear(), currentDate.getMonth() + 1).then(notesByDate => {
-                renderCalendar(currentDate, notesByDate);
+
+function renderCalendar(date, notesByDate = {}) {
+    calendar.innerHTML = `
+        <div class='day-header'>Dom</div>
+        <div class='day-header'>Seg</div>
+        <div class='day-header'>Ter</div>
+        <div class='day-header'>Qua</div>
+        <div class='day-header'>Qui</div>
+        <div class='day-header'>Sex</div>
+        <div class='day-header'>Sáb</div>`;
+
+    let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    let daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+        calendar.innerHTML += `<div class='day'></div>`;
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        let notesHTML = '';
+
+        if (notesByDate[formattedDate]) {
+            notesByDate[formattedDate].forEach(note => {
+                const noteColor = note.category_color || '#D3D3D3'; 
+
+                notesHTML += `<div class="note" style="background-color: ${noteColor};">${note.title}</div>`;
             });
         }
 
-        todayBtn.addEventListener("click", function () {
-            currentDate = new Date();
-            updateCalendar();
-        });
+        calendar.innerHTML += `
+            <div class='day'>
+                <strong>${day}</strong>
+                ${notesHTML}
+            </div>`;
+    }
+}
 
-        prevBtn.addEventListener("click", function () {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateCalendar();
-        });
 
-        nextBtn.addEventListener("click", function () {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateCalendar();
-        });
 
+
+
+    function updateCalendar() {
+        fetchNotes(currentDate.getFullYear(), currentDate.getMonth() + 1).then(notesByDate => {
+            renderCalendar(currentDate, notesByDate);
+            updateMonthLabel(); // Atualiza o nome do mês e ano
+        });
+    }
+
+    todayBtn.addEventListener("click", function () {
+        currentDate = new Date();
         updateCalendar();
     });
+
+    prevBtn.addEventListener("click", function () {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        updateCalendar();
+    });
+
+    nextBtn.addEventListener("click", function () {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        updateCalendar();
+    });
+
+    updateCalendar();
+});
+
 </script>
 
 </body>

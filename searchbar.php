@@ -77,31 +77,77 @@
             </button>
             <div class="filter-dropdown" id="filter-dropdown">
                 <label for="category-filter">Escolha a categoria:</label>
-                <select id="category-filter"></select>
-                
+                <select id="category-filter">
+                    <option value="">Todas as categorias</option>
+                    <!-- Categorias serão inseridas aqui -->
+                </select>
             </div>
         </div>
     </div>
     
     <script>
-        document.getElementById('search-input').addEventListener('input', function () {
-            let filter = this.value.toLowerCase();
-            let notes = document.querySelectorAll('.note-card');
-    
-            notes.forEach(note => {
-                let title = note.querySelector('h3').textContent.toLowerCase();
-                if (title.includes(filter)) {
-                    note.style.display = '';
-                } else {
-                    note.style.display = 'none';
-                }
-            });
+        // Carregar categorias dinamicamente via PHP
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('category.php?action=get_categories') // Requisição para obter as categorias
+                .then(response => response.json())
+                .then(data => {
+                    const categorySelect = document.getElementById('category-filter');
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        categorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar categorias:', error));
         });
-        
-        document.getElementById('filter-btn').addEventListener('click', function () {
+
+        // Exibir ou ocultar o dropdown de categorias
+        document.getElementById('filter-btn').addEventListener('click', function (e) {
+            e.stopPropagation(); // Impede o clique de propagar para o documento
             let dropdown = document.getElementById('filter-dropdown');
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         });
+
+        // Fechar o dropdown ao clicar fora dele
+        document.addEventListener('click', function (e) {
+            let dropdown = document.getElementById('filter-dropdown');
+            let filterBtn = document.getElementById('filter-btn');
+            if (!filterBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Fechar o dropdown quando a categoria for selecionada
+        document.getElementById('category-filter').addEventListener('change', function() {
+            let dropdown = document.getElementById('filter-dropdown');
+            dropdown.style.display = 'none';  // Fecha o dropdown após a seleção de categoria
+            filterNotes();
+        });
+
+        // Filtrando notas com base na categoria e no texto da pesquisa
+        document.getElementById('search-input').addEventListener('input', function () {
+            filterNotes();
+        });
+
+        function filterNotes() {
+            let filterText = document.getElementById('search-input').value.toLowerCase();
+            let filterCategory = document.getElementById('category-filter').value;
+            let notes = document.querySelectorAll('.note-card');  // Seleciona todas as notas
+            
+            notes.forEach(note => {
+                let title = note.querySelector('h3').textContent.toLowerCase();
+                let category = note.getAttribute('data-category');  // Pega o ID da categoria da nota
+
+                // Verifica se o título contém o texto de pesquisa e se a categoria é a selecionada
+                if ((title.includes(filterText)) && (filterCategory === '' || category === filterCategory)) {
+                    note.style.display = '';  // Exibe a nota
+                } else {
+                    note.style.display = 'none';  // Oculta a nota
+                }
+            });
+        }
+
     </script>
 </body>
 </html>

@@ -11,6 +11,25 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id']; // ID do usuário autenticado
 
+$stmt = $pdo->prepare("INSERT INTO categories (user_id, name, color) 
+                        SELECT ?, 'Sem Categoria', '#D3D3D3' 
+                        WHERE NOT EXISTS (SELECT 1 FROM categories WHERE user_id = ? AND name = 'Sem Categoria')");
+$stmt->execute([$user_id, $user_id]);
+
+
+// Rota para carregar as categorias
+if (isset($_GET['action']) && $_GET['action'] === 'get_categories') {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM categories WHERE user_id = ? ORDER BY name ASC");
+        $stmt->execute([$user_id]);
+        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['categories' => $categories]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => 'Erro ao carregar as categorias: ' . $e->getMessage()]);
+    }
+    exit();
+}
+
 // Adicionando uma categoria
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_category') {
     $name = $_POST['name'];
@@ -76,7 +95,153 @@ $categories = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categorias</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* Botão principal */
+#create-category {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    margin: 20px;
+    display: block;
+}
+
+#create-category:hover {
+    background-color: #2980b9;
+}
+
+/* Modal */
+#category-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    width: 300px;
+    border-radius: 5px;
+}
+
+#category-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#category-modal-header h2 {
+    margin: 0;
+}
+
+#close-modal {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Inputs lado a lado */
+.category-inputs {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+#category-name {
+    flex-grow: 1;
+    padding: 5px;
+}
+
+#category-color {
+    width: 50px;
+    height: 35px;
+    border: none;
+}
+
+/* Botões do modal */
+#save-category, #cancel-category {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+#save-category {
+    background-color: #2ecc71;
+    color: white;
+}
+
+#save-category:hover {
+    background-color: #27ae60;
+}
+
+#cancel-category {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#cancel-category:hover {
+    background-color: #c0392b;
+}
+
+/* Estilo do título "Suas categorias" */
+h2 {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Lista de Categorias */
+#categories-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+    gap: 5px;
+    padding: 10px;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 5px;
+    border-radius: 3px;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+}
+
+/* Botões de edição e exclusão */
+.btn-edit-category {
+    background-color: #f1c40f; /* Amarelo */
+    border: none;
+    padding: 3px 6px;
+    cursor: pointer;
+    color: white;
+    font-size: 12px;
+    margin-left: 3px;
+}
+
+.btn-edit-category:hover {
+    background-color: #d4ac0d;
+}
+
+.btn-delete-category {
+    background-color: #e74c3c;
+    border: none;
+    padding: 3px 6px;
+    cursor: pointer;
+    color: white;
+    font-size: 12px;
+    margin-left: 3px;
+}
+
+.btn-delete-category:hover {
+    background-color: #c0392b;
+}
+
+    </style>
 </head>
 <body>
     <!-- Botão principal -->
@@ -100,14 +265,14 @@ $categories = $stmt->fetchAll();
 
         <!-- Lista de Categorias -->
         <div id="categories-list">
-            <?php foreach ($categories as $category): ?>
-                <div class="category-item" id="category-<?= $category['id'] ?>">
-                    <span style="color: <?= $category['color'] ?>"><?= $category['name'] ?></span>
-                    <button class="btn-edit-category" onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>', '<?= $category['color'] ?>')">Editar</button>
-                    <button class="btn-delete-category" onclick="deleteCategory(<?= $category['id'] ?>)">Excluir</button>
-                </div>
-            <?php endforeach; ?>
+    <?php foreach ($categories as $category): ?>
+        <div class="category-item" id="category-<?= $category['id'] ?>">
+            <span style="color: <?= $category['color'] ?>"><?= $category['name'] ?></span>
+            <button class="btn-edit-category" onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>', '<?= $category['color'] ?>')">Editar</button>
+            <button class="btn-delete-category" onclick="deleteCategory(<?= $category['id'] ?>)">Excluir</button>
         </div>
+    <?php endforeach; ?>
+</div>
     </div>
 
     <script>

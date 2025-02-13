@@ -15,9 +15,16 @@ $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 $startDate = "$year-$month-01";
 $endDate = date("Y-m-t", strtotime($startDate));
 
-$stmt = $pdo->prepare("SELECT id, title, content, DATE(schedule_date) as date FROM notes WHERE user_id = ? AND schedule_date BETWEEN ? AND ?");
+$stmt = $pdo->prepare("SELECT notes.id, notes.title, notes.content, DATE(notes.schedule_date) as date, notes.schedule_date, 
+                            IFNULL(categories.color, '#D3D3D3') AS category_color, categories.name AS category_name 
+                        FROM notes 
+                        LEFT JOIN categories ON notes.category_id = categories.id 
+                        WHERE notes.user_id = ? AND notes.schedule_date BETWEEN ? AND ?");
 $stmt->execute([$user_id, $startDate, $endDate]);
 $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Resposta JSON
 echo json_encode($notes);
+
+
 ?>
