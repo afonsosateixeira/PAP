@@ -31,7 +31,7 @@ if (!isset($_SESSION['user_id'])) {
     <main>
         <div id="main-content">
             <h1>Bem-vindo à Dashboard</h1>
-            <p>Escolha uma opção na barra lateral para começar.</p>
+            <?php include 'category.php'; ?>
         </div>
     </main>
 

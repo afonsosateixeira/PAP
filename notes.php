@@ -239,7 +239,6 @@ button{
         <h1>Agendamento de Notas</h1>
         <div class="buttons-container">
             <button id="create-note">Criar nota</button>
-            <?php include 'category.php'; ?>
         </div>
         <?php include 'searchbar.php'; ?>
 
@@ -250,15 +249,23 @@ button{
                 <input type="text" id="note-title" name="title" placeholder="Título" required>
                 <textarea id="note-content" name="content" placeholder="Conteúdo" required></textarea>
                 <select id="note-category" name="category_id">
-                    <option value="">Selecione uma Categoria</option>
-                    <?php
-                    $stmt = $pdo->prepare("SELECT * FROM categories WHERE user_id = ? ORDER BY name ASC");
-                    $stmt->execute([$_SESSION['user_id']]);
-                    $categories = $stmt->fetchAll();
-                    foreach ($categories as $category): ?>
-                        <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+    <?php
+    $stmt = $pdo->prepare("
+        SELECT * FROM categories 
+        WHERE user_id = ? 
+        ORDER BY 
+            CASE 
+                WHEN name = 'Sem Categoria' THEN 0 
+                ELSE 1 
+            END, name ASC
+    ");
+    $stmt->execute([$_SESSION['user_id']]);
+    $categories = $stmt->fetchAll();
+    foreach ($categories as $category): ?>
+        <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
+    <?php endforeach; ?>
+</select>
+
                 <input type="datetime-local" id="note-date" name="schedule_date" required>
                 <button type="button" id="save-note">Salvar</button>
                 <button type="button" id="cancel">Cancelar</button>
@@ -294,14 +301,27 @@ button{
     </main>
 
     <script>
-    document.getElementById('create-note').addEventListener('click', function() {
-        document.getElementById('note-form').style.display = 'block'; // Exibe o formulário
-        document.getElementById('note-id').value = ''; // Limpa o id da nota
-        document.getElementById('note-title').value = ''; // Limpa o título
-        document.getElementById('note-content').value = ''; // Limpa o conteúdo
-        document.getElementById('note-date').value = ''; // Limpa a data
-        document.getElementById('save-note').textContent = 'Salvar'; // Muda o texto do botão
-    });
+  document.getElementById('create-note').addEventListener('click', function() {
+    document.getElementById('note-form').style.display = 'block'; // Exibe o formulário
+    document.getElementById('note-id').value = ''; // Limpa o id da nota
+    document.getElementById('note-title').value = ''; // Limpa o título
+    document.getElementById('note-content').value = ''; // Limpa o conteúdo
+    document.getElementById('note-date').value = ''; // Limpa a data
+
+    // Seleciona automaticamente a opção "Sem Categoria"
+    const categorySelect = document.getElementById('note-category');
+    if (categorySelect) {
+        for (let option of categorySelect.options) {
+            if (option.textContent.trim() === 'Sem Categoria') {
+                categorySelect.value = option.value;
+                break;
+            }
+        }
+    }
+
+    document.getElementById('save-note').textContent = 'Salvar'; // Muda o texto do botão
+});
+
 
     document.getElementById('cancel').addEventListener('click', function() {
         document.getElementById('note-form').style.display = 'none'; // Fecha o formulário

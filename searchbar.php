@@ -88,19 +88,40 @@
     <script>
         // Carregar categorias dinamicamente via PHP
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('category.php?action=get_categories') // Requisição para obter as categorias
-                .then(response => response.json())
-                .then(data => {
-                    const categorySelect = document.getElementById('category-filter');
-                    data.categories.forEach(category => {
-                        const option = document.createElement('option');
-                        option.value = category.id;
-                        option.textContent = category.name;
-                        categorySelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Erro ao carregar categorias:', error));
-        });
+    fetch('category.php?action=get_categories') // Requisição para obter as categorias
+        .then(response => response.json())
+        .then(data => {
+            const categorySelect = document.getElementById('category-filter');
+            
+            // Garante que a lista está limpa antes de adicionar as opções
+            categorySelect.innerHTML = "";
+
+            // Adiciona a opção "Todas as Categorias"
+            const allCategoriesOption = document.createElement('option');
+            allCategoriesOption.value = ""; // Valor vazio para representar todas
+            allCategoriesOption.textContent = "Todas as Categorias";
+            categorySelect.appendChild(allCategoriesOption);
+
+            // Adiciona "Sem Categoria" apenas uma vez
+            const noCategoryOption = document.createElement('option');
+            noCategoryOption.value = "0"; // Valor 0 para representar "Sem Categoria"
+            noCategoryOption.textContent = "Sem Categoria";
+            categorySelect.appendChild(noCategoryOption);
+
+            // Adiciona as categorias do banco de dados (excluindo "Sem Categoria" caso já exista)
+            data.categories.forEach(category => {
+                if (category.name.toLowerCase() !== "sem categoria") { // Evita duplicação
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                }
+            });
+        })
+        .catch(error => console.error('Erro ao carregar categorias:', error));
+});
+
+
 
         // Exibir ou ocultar o dropdown de categorias
         document.getElementById('filter-btn').addEventListener('click', function (e) {
@@ -131,22 +152,27 @@
         });
 
         function filterNotes() {
-            let filterText = document.getElementById('search-input').value.toLowerCase();
-            let filterCategory = document.getElementById('category-filter').value;
-            let notes = document.querySelectorAll('.note-card');  // Seleciona todas as notas
-            
-            notes.forEach(note => {
-                let title = note.querySelector('h3').textContent.toLowerCase();
-                let category = note.getAttribute('data-category');  // Pega o ID da categoria da nota
+    let filterText = document.getElementById('search-input').value.toLowerCase();
+    let filterCategory = document.getElementById('category-filter').value;
+    let notes = document.querySelectorAll('.note-card');  // Seleciona todas as notas
+    
+    notes.forEach(note => {
+        let title = note.querySelector('h3').textContent.toLowerCase();
+        let category = note.getAttribute('data-category');  // Obtém o ID da categoria da nota
 
-                // Verifica se o título contém o texto de pesquisa e se a categoria é a selecionada
-                if ((title.includes(filterText)) && (filterCategory === '' || category === filterCategory)) {
-                    note.style.display = '';  // Exibe a nota
-                } else {
-                    note.style.display = 'none';  // Oculta a nota
-                }
-            });
+        // Considera "Sem Categoria" como categoria 0 ou vazia
+        let isNoCategory = (category === "0" || category === "");
+
+        // Verifica se o título contém o texto de pesquisa e se a categoria corresponde
+        if ((title.includes(filterText)) && 
+            (filterCategory === '' || category === filterCategory || (filterCategory === "0" && isNoCategory))) {
+            note.style.display = '';  // Exibe a nota
+        } else {
+            note.style.display = 'none';  // Oculta a nota
         }
+    });
+}
+
 
     </script>
 </body>

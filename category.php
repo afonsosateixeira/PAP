@@ -30,6 +30,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_categories') {
     exit();
 }
 
+$stmt = $pdo->prepare("SELECT * FROM categories WHERE user_id = ? AND name != 'Sem Categoria' ORDER BY name ASC");
+
+
 // Adicionando uma categoria
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_category') {
     $name = $_POST['name'];
@@ -83,8 +86,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete') {
     exit();
 }
 
-// Carregar todas as categorias do usuário autenticado
-$stmt = $pdo->prepare("SELECT * FROM categories WHERE user_id = ? ORDER BY name ASC");
+// Carregar todas as categorias do usuário autenticado, excluindo "Sem Categoria"
+$stmt = $pdo->prepare("SELECT * FROM categories WHERE user_id = ? AND name != 'Sem Categoria' ORDER BY name ASC");
 $stmt->execute([$user_id]);
 $categories = $stmt->fetchAll();
 ?>
@@ -131,9 +134,6 @@ $categories = $stmt->fetchAll();
     align-items: center;
 }
 
-#category-modal-header h2 {
-    margin: 0;
-}
 
 #close-modal {
     background: none;
@@ -187,7 +187,15 @@ $categories = $stmt->fetchAll();
     background-color: #c0392b;
 }
 
-/* Estilo do título "Suas categorias" */
+#toggle-categories {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            margin: 20px;
+        }
+
 h2 {
     text-align: center;
     margin-top: 20px;
@@ -195,9 +203,7 @@ h2 {
 
 /* Lista de Categorias */
 #categories-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Duas colunas */
-    gap: 5px;
+    display: none;
     padding: 10px;
 }
 
@@ -210,80 +216,84 @@ h2 {
     border-radius: 3px;
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
     font-size: 14px;
+    margin-bottom: 5px;
 }
 
-/* Botões de edição e exclusão */
-.btn-edit-category {
-    background-color: #f1c40f; /* Amarelo */
-    border: none;
-    padding: 3px 6px;
-    cursor: pointer;
-    color: white;
-    font-size: 12px;
-    margin-left: 3px;
-}
+.category-actions {
+            display: flex;
+            gap: 10px;
+        }
 
-.btn-edit-category:hover {
-    background-color: #d4ac0d;
-}
+        .edit-category, .delete-category {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            cursor: pointer;
+            background: none;
+            font-size: 14px;
+        }
 
-.btn-delete-category {
-    background-color: #e74c3c;
-    border: none;
-    padding: 3px 6px;
-    cursor: pointer;
-    color: white;
-    font-size: 12px;
-    margin-left: 3px;
-}
+        .edit-category {
+            color: gray;
+        }
 
-.btn-delete-category:hover {
-    background-color: #c0392b;
-}
-
+        .delete-category {
+            color: red;
+        }
     </style>
 </head>
 <body>
-    <!-- Botão principal -->
-    <button id="create-category">Criar Categoria</button>
+<button id="create-category">Criar Categoria</button>
 
-    <!-- Modal para criação/edição de categoria -->
-    <div id="category-modal" style="display:none;">
-        <div id="category-modal-header">
-            <h2>Gerenciar Categoria</h2>
-            <button id="close-modal">X</button>
-        </div>
-        <input type="hidden" id="category-id">
-        <div class="category-inputs">
-            <input type="text" id="category-name" placeholder="Nome da Categoria" required>
-            <input type="color" id="category-color" value="#ffffff" required>
-        </div>
-        <button type="button" id="save-category">Salvar</button>
-        <button type="button" id="cancel-category">Cancelar</button>
+<div id="category-modal">
+    <h2>Gerenciar Categoria</h2>
+    <input type="hidden" id="category-id">
+    <div class="category-inputs">
+        <input type="text" id="category-name" placeholder="Nome da Categoria" required>
+        <input type="color" id="category-color" value="#ffffff" required>
+    </div>
+    <button type="button" id="save-category">Salvar</button>
+    <button type="button" id="cancel-category">Cancelar</button>
+</div>
 
-        <h2>Suas categorias</h2>
+<div id="toggle-categories">
+    <span>&#9660;</span>
+    <strong>Lista de Categorias</strong>
+</div>
 
         <!-- Lista de Categorias -->
         <div id="categories-list">
-    <?php foreach ($categories as $category): ?>
-        <div class="category-item" id="category-<?= $category['id'] ?>">
-            <span style="color: <?= $category['color'] ?>"><?= $category['name'] ?></span>
-            <button class="btn-edit-category" onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>', '<?= $category['color'] ?>')">Editar</button>
-            <button class="btn-delete-category" onclick="deleteCategory(<?= $category['id'] ?>)">Excluir</button>
-        </div>
-    <?php endforeach; ?>
-</div>
+        <?php foreach ($categories as $category): ?>
+            <div class="category-item">
+                <span style="color: <?= $category['color'] ?>;"> <?= $category['name'] ?> </span>
+                <div class="category-actions">
+                    <button class="edit-category" onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>', '<?= $category['color'] ?>')">
+                        🖉 Edit
+                    </button>
+                    <button class="delete-category" onclick="deleteCategory(<?= $category['id'] ?>)">
+                        🗑 Delete
+                    </button>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 
     <script>
-        // Exibir modal ao clicar no botão Criar Categoria
-        document.getElementById('create-category').addEventListener('click', function() {
+         document.getElementById('create-category').addEventListener('click', function() {
             document.getElementById('category-modal').style.display = 'block';
+            document.getElementById('category-id').value = '';
+            document.getElementById('category-name').value = '';
+            document.getElementById('category-color').value = '#ffffff';
         });
 
-        // Fechar modal
-        document.getElementById('close-modal').addEventListener('click', function() {
+        document.getElementById('cancel-category').addEventListener('click', function() {
             document.getElementById('category-modal').style.display = 'none';
+        });
+
+        document.getElementById('toggle-categories').addEventListener('click', function() {
+            const list = document.getElementById('categories-list');
+            list.style.display = list.style.display === 'none' ? 'block' : 'none';
         });
 
         // Salva ou edita a categoria

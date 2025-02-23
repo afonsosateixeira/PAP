@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: #e3e9f7;
+            background: #e4e4e4;;
         }
 
         .container {
