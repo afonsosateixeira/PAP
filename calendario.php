@@ -100,6 +100,44 @@ foreach ($notes as $note) {
     font-size: 12px;
     border-radius: 4px;
 }
+/* Estilo do modal */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 10; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; 
+    background-color: rgba(0, 0, 0, 0.4); 
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 
 
 .note[data-no-category="true"] {
@@ -140,6 +178,17 @@ foreach ($notes as $note) {
             <div class="day-header">Sáb</div>
         </div>
     </div>
+    <!-- Modal para exibir detalhes da nota -->
+<div id="note-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modal-title"></h2>
+        <p><strong>Descrição:</strong> <span id="modal-description"></span></p>
+        <p><strong>Data:</strong> <span id="modal-date"></span></p>
+        <p><strong>Categoria:</strong> <span id="modal-category"></span></p>
+    </div>
+</div>
+
 
     <script>
    document.addEventListener("DOMContentLoaded", function () {
@@ -148,79 +197,100 @@ foreach ($notes as $note) {
     const prevBtn = document.getElementById("prev");
     const nextBtn = document.getElementById("next");
     const monthLabel = document.getElementById("current-month");
+    const modal = document.getElementById("note-modal");
+    const closeModal = document.querySelector(".close");
     let currentDate = new Date();
 
+    // Campos do modal
+    const modalTitle = document.getElementById("modal-title");
+    const modalDescription = document.getElementById("modal-description");
+    const modalDate = document.getElementById("modal-date");
+    const modalCategory = document.getElementById("modal-category");
+
     function updateMonthLabel() {
-    const monthNames = [
-        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-    ];
-    monthLabel.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-}
-
-
-function fetchNotes(year, month) {
-    return fetch(`fetch_notes.php?year=${year}&month=${month}`)
-        .then(response => response.json())
-        .then(notes => {
-            let notesByDate = {};
-            notes.forEach(note => {
-                if (!notesByDate[note.date]) {
-                    notesByDate[note.date] = [];
-                }
-                notesByDate[note.date].push(note);
-            });
-            return notesByDate;
-        });
-}
-
-
-
-function renderCalendar(date, notesByDate = {}) {
-    calendar.innerHTML = `
-        <div class='day-header'>Dom</div>
-        <div class='day-header'>Seg</div>
-        <div class='day-header'>Ter</div>
-        <div class='day-header'>Qua</div>
-        <div class='day-header'>Qui</div>
-        <div class='day-header'>Sex</div>
-        <div class='day-header'>Sáb</div>`;
-
-    let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    let daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
-        calendar.innerHTML += `<div class='day'></div>`;
+        const monthNames = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+        monthLabel.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
     }
 
-    for (let day = 1; day <= daysInMonth; day++) {
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        let notesHTML = '';
-
-        if (notesByDate[formattedDate]) {
-            notesByDate[formattedDate].forEach(note => {
-                const noteColor = note.category_color || '#D3D3D3'; 
-
-                notesHTML += `<div class="note" style="background-color: ${noteColor};">${note.title}</div>`;
+    function fetchNotes(year, month) {
+        return fetch(`fetch_notes.php?year=${year}&month=${month}`)
+            .then(response => response.json())
+            .then(notes => {
+                let notesByDate = {};
+                notes.forEach(note => {
+                    if (!notesByDate[note.date]) {
+                        notesByDate[note.date] = [];
+                    }
+                    notesByDate[note.date].push(note);
+                });
+                return notesByDate;
             });
+    }
+
+    function renderCalendar(date, notesByDate = {}) {
+        calendar.innerHTML = `
+            <div class='day-header'>Dom</div>
+            <div class='day-header'>Seg</div>
+            <div class='day-header'>Ter</div>
+            <div class='day-header'>Qua</div>
+            <div class='day-header'>Qui</div>
+            <div class='day-header'>Sex</div>
+            <div class='day-header'>Sáb</div>`;
+
+        let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        let daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            calendar.innerHTML += `<div class='day'></div>`;
         }
 
-        calendar.innerHTML += `
-            <div class='day'>
-                <strong>${day}</strong>
-                ${notesHTML}
-            </div>`;
+        for (let day = 1; day <= daysInMonth; day++) {
+            const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            let notesHTML = '';
+
+            if (notesByDate[formattedDate]) {
+                notesByDate[formattedDate].forEach(note => {
+                    const noteColor = note.category_color || '#D3D3D3'; 
+                    notesHTML += `
+                        <div 
+                            class="note" 
+                            style="background-color: ${noteColor};" 
+                            data-title="${note.title}" 
+                            data-description="${note.content}" 
+                            data-date="${formattedDate}" 
+                            data-category="${note.category || 'Sem categoria'}"
+                        >
+                            ${note.title}
+                        </div>`;
+                });
+            }
+
+            calendar.innerHTML += `
+                <div class='day'>
+                    <strong>${day}</strong>
+                    ${notesHTML}
+                </div>`;
+        }
+
+        // Adiciona o evento de clique às notas para abrir o modal
+        document.querySelectorAll(".note").forEach(note => {
+            note.addEventListener("click", (e) => {
+                modalTitle.textContent = e.currentTarget.getAttribute("data-title");
+                modalDescription.textContent = e.currentTarget.getAttribute("data-description");
+                modalDate.textContent = e.currentTarget.getAttribute("data-date");
+                modalCategory.textContent = e.currentTarget.getAttribute("data-category");
+                modal.style.display = "block";
+            });
+        });
     }
-}
-
-
-
-
 
     function updateCalendar() {
         fetchNotes(currentDate.getFullYear(), currentDate.getMonth() + 1).then(notesByDate => {
             renderCalendar(currentDate, notesByDate);
-            updateMonthLabel(); // Atualiza o nome do mês e ano
+            updateMonthLabel(); 
         });
     }
 
@@ -239,8 +309,19 @@ function renderCalendar(date, notesByDate = {}) {
         updateCalendar();
     });
 
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+        if (e.target == modal) {
+            modal.style.display = "none";
+        }
+    });
+
     updateCalendar();
 });
+
 
 </script>
 

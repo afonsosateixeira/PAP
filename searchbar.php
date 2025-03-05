@@ -17,7 +17,7 @@
     .search-bar {
         display: flex;
         align-items: center;
-        width: 50%;
+        width: 350px;
         border: 1px solid #ccc;
         border-radius: 5px;
         padding: 10px;
@@ -71,7 +71,7 @@
     <div class="search-container">
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" id="search-input" placeholder="Pesquisar notas...">
+            <input type="text" id="search-input" placeholder="Pesquisar...">
             <button class="filter-btn" id="filter-btn">
                 <i class="fas fa-filter"></i>
             </button>
@@ -169,6 +169,34 @@
             note.style.display = '';  // Exibe a nota
         } else {
             note.style.display = 'none';  // Oculta a nota
+        }
+    });
+}
+
+// Filtrando tarefas com base na categoria e no texto da pesquisa
+document.getElementById('search-input').addEventListener('input', function () {
+    filterTasks();  // Chama a função de filtro sempre que o input mudar
+});
+
+document.getElementById('category-filter').addEventListener('change', function() {
+    filterTasks();  // Chama a função de filtro quando a categoria for alterada
+});
+
+function filterTasks() {
+    let filterText = document.getElementById('search-input').value.toLowerCase();
+    let filterCategory = document.getElementById('category-filter').value;
+    let tasks = document.querySelectorAll('.task-row');  // Seleciona todas as tarefas na tabela
+    
+    tasks.forEach(task => {
+        let title = task.querySelector('.task-title').textContent.toLowerCase();
+        let category = task.querySelector('.task-category').textContent.toLowerCase();  // Supondo que a categoria esteja nesta classe
+        
+        // Verifica se o título contém o texto de pesquisa e se a categoria corresponde
+        if ((title.includes(filterText)) && 
+            (filterCategory === '' || category.includes(filterCategory.toLowerCase()))) {
+            task.style.display = '';  // Exibe a tarefa
+        } else {
+            task.style.display = 'none';  // Oculta a tarefa
         }
     });
 }

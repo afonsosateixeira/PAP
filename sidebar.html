@@ -64,11 +64,13 @@
         }
 
         #side_items {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            list-style: none;
-        }
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+}
+
 
         .side-item {
             border-radius: 8px;
@@ -78,8 +80,13 @@
         }
 
         .side-item.active {
-            background-color: #71b9f0;
-        }
+    background-color: #71b9f0;
+    padding: 14px; /* Mantém o padding consistente */
+    margin: 0; /* Remove possíveis margens */
+    display: flex;
+    align-items: center;
+}
+
 
         .side-item:hover:not(.active),
         #logout_btn:hover {
@@ -94,10 +101,15 @@
             color: #0a0a0a;
             font-weight: 500;
         }
-
         .side-item.active a {
-            color: #e3e9f7;
-        }
+    color: #e3e9f7;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Define um gap fixo */
+}
+
 
         .side-item a i {
             display: flex;
@@ -173,6 +185,13 @@
             justify-content: flex-start;
             gap: 14px;
         }
+        
+        ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
     </style>
 </head>
 <body>
@@ -202,10 +221,10 @@
                 </li>
 
                 <li class="side-item">
-                    <a href="navbar.php">
-                        <i class="fa fa-hammer"></i>
+                    <a href="tarefas.php">
+                        <i class="fa fa-tasks"></i>
                         <span class="item-description">
-                            EM DEV...
+                            Tarefas
                         </span>
                     </a>
                 </li>
@@ -227,9 +246,18 @@
                         </span>
                     </a>
                 </li>
+
+                <li class="side-item">
+                    <a href="relogio.php">
+                        <i class="fa fa-clock"></i>
+                        <span class="item-description">
+                            Relógio
+                        </span>
+                    </a>
+                </li>
     
                 <li class="side-item">
-                    <a href="#">
+                    <a href="configuration.php">
                         <i class="fa-solid fa-gear"></i>
                         <span class="item-description">
                             Configurações
