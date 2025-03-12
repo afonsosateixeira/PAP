@@ -1,5 +1,5 @@
 <?php
-// Configuração do banco de dados
+// Configuração da base de dados
 $host = 'localhost';
 $dbname = 'pap_db';
 $username = 'root';
@@ -12,3 +12,4 @@ try {
     die("Erro na conexão com o banco de dados: " . $e->getMessage());
 }
 ?>
+

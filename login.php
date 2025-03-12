@@ -132,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="container">
         <div class="form-container">
-            <h2>Login</h2>
+            <h2>Entrar</h2>
             <form action="login.php" method="POST">
                 <label for="email">Email</label>
                 <input type="email" name="email" placeholder="Email" required>
@@ -140,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="password">Senha</label>
                 <input type="password" name="password" placeholder="Senha" required>
                 
-                <button type="submit">Entrar</button>
+                <button type="submit">Continuar</button>
             </form>
             <p class="create-account">Não tem uma conta? <a href="register.php">Criar conta</a></p>
         </div>

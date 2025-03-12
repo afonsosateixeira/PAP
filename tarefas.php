@@ -189,7 +189,7 @@ if (isset($_GET['edit'])) {
                         <option value="4" <?php echo (isset($task) && $task['recorrenciaTarefa'] == 4) ? 'selected' : ''; ?>>Anual</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mt-3">Salvar</button>
+                <button type="submit" id="save-note" class="btn btn-success w-100">Salvar</button>
                 <button type="button" id="cancel" class="btn btn-danger w-100 mt-3">Cancelar</button>
             </form>
         </div>
@@ -285,6 +285,12 @@ if (isset($_GET['edit'])) {
         document.getElementById('cancel').addEventListener('click', function() {
             document.getElementById('task-form').style.display = 'none';
         });
+
+        document.getElementById('save-category').addEventListener('click', function() {
+    // Submete o formulário manualmente
+    document.getElementById('task-form-content').submit();
+});
+
     </script>
 
 </body>

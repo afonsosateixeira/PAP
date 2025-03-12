@@ -39,7 +39,8 @@ CREATE TABLE sessions (
 
 -- Criando a tabela de tarefas
 CREATE TABLE tbtarefas (
-    idTarefa INT NOT NULL AUTO_INCREMENT,
+    idTarefa INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     tituloTarefa VARCHAR(255) NOT NULL,
     descricaoTarefa TEXT NOT NULL,
     recorrenciaTarefa INT NOT NULL DEFAULT '0',
@@ -47,7 +48,7 @@ CREATE TABLE tbtarefas (
     dataconclusao_date DATETIME NULL,
     datalembrete_date DATETIME NULL,
     category_id INT NULL,
-    PRIMARY KEY (idTarefa),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 

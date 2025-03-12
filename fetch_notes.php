@@ -25,6 +25,6 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Resposta JSON
 echo json_encode($notes);
-
-
 ?>
+
+

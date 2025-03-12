@@ -117,7 +117,6 @@ $notes = $stmt->fetchAll();
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-top: 40px;
         }
 
         /* Card das Notas */
@@ -194,7 +193,7 @@ $notes = $stmt->fetchAll();
                     <input type="datetime-local" id="note-date" name="schedule_date" class="form-control" required>
                 </div>
 
-                <button type="button" id="save-note" class="btn btn-primary w-100 mt-3">Salvar</button>
+                <button type="button" id="save-note" class="btn btn-success w-100"> Salvar</button>
                 <button type="button" id="cancel-note" class="btn btn-danger w-100 mt-3">Cancelar</button>
             </form>
         </div>

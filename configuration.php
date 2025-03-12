@@ -30,7 +30,6 @@ if (!isset($_SESSION['user_id'])) {
     <!-- Conteúdo da página -->
     <main>
         <div id="main-content">
-        <?php include 'category.php'; ?>
         </div>
     </main>
 

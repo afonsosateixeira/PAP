@@ -139,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="password">Senha</label>
                 <input type="password" name="password" placeholder="Senha" required>
                 
-                <button type="submit">Registrar</button>
+                <button type="submit">Continuar</button>
             </form>
             <p class="create-account">Já tem uma conta? <a href="login.php">Entrar</a></p>
         </div>
