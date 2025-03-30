@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['save_alarm'])) {
     $alarm_id   = isset($_POST['alarm_id']) ? intval($_POST['alarm_id']) : 0;
     $title      = trim($_POST['alarm_title']);
     $time       = $_POST['alarm_time']; // "HH:MM"
-    $ringtone   = trim($_POST['alarm_ringtone']);
+    $ringtone = isset($_POST['alarm_ringtone']) ? trim($_POST['alarm_ringtone']) : '';
     $active     = isset($_POST['alarm_active']) ? 1 : 0;
     $daysOfWeek = isset($_POST['days_of_week']) ? implode(',', $_POST['days_of_week']) : null;
 
@@ -83,9 +83,9 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
     color: #fff;
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #333;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease;
+    margin: 10px;
 }
 
 .alarm-card:hover {
@@ -141,7 +141,7 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <?php include 'sidebar.php'; ?>
 
-    <div class="container mt-5">
+    <div id="main-content">
         <h1 class="mb-4"> Gestor de alarmes</h1>
         <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#alarmModal"
                 onclick="

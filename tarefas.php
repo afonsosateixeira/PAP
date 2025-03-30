@@ -253,48 +253,76 @@ if (isset($_GET['edit'])) {
     </div>
 
     <script>
-        // Mostrar o formulário de criação/edição
-        document.getElementById('create-note').addEventListener('click', function() {
-            document.getElementById('task-form').style.display = 'block';
-            document.getElementById('task-form-content').reset();
-            document.getElementById('form-title').textContent = 'Adicionar Tarefa';
-        });
+        // Mostrar o formulário de criação de tarefa
+document.getElementById('create-note').addEventListener('click', function() {
+    // Resetar o formulário
+    document.getElementById('task-form').style.display = 'block';
+    document.getElementById('task-form-content').reset();
+    document.getElementById('form-title').textContent = 'Adicionar Tarefa';
+    
+    // Garantir que o campo 'task_id' não exista ao criar uma nova tarefa
+    const existingIdField = document.querySelector('input[name="task_id"]');
+    if (existingIdField) {
+        existingIdField.remove();  // Remove o campo oculto de edição, caso exista
+    }
+});
 
-        // Função para preencher o formulário de edição
-        function editTask(id, titulo, descricao, dataConclusao, dataLembrete, recorrencia, categoryId) {
-            document.getElementById('task-form').style.display = 'block';
-            document.getElementById('form-title').textContent = 'Editar Tarefa';
+// Função para preencher o formulário de edição
+function editTask(id, titulo, descricao, dataConclusao, dataLembrete, recorrencia, categoryId) {
+    document.getElementById('task-form').style.display = 'block';
+    document.getElementById('form-title').textContent = 'Editar Tarefa';
 
-            document.getElementById('titulo').value = titulo;
-            document.getElementById('descricao').value = descricao;
-            document.getElementById('dataHoraConclusao').value = dataConclusao;
-            document.getElementById('dataHoraLembrete').value = dataLembrete;
-            document.getElementById('recorrencia').value = recorrencia;
-            document.getElementById('categoria').value = categoryId;
+    document.getElementById('titulo').value = titulo;
+    document.getElementById('descricao').value = descricao;
+    document.getElementById('dataHoraConclusao').value = dataConclusao;
+    document.getElementById('dataHoraLembrete').value = dataLembrete;
+    document.getElementById('recorrencia').value = recorrencia;
+    document.getElementById('categoria').value = categoryId;
 
-            // Remover o campo 'hidden' existente (caso haja)
-            const existingIdField = document.querySelector('input[name="task_id"]');
-            if (existingIdField) {
-                existingIdField.remove();
-            }
+    // Remover o campo 'hidden' existente (caso haja)
+    const existingIdField = document.querySelector('input[name="task_id"]');
+    if (existingIdField) {
+        existingIdField.remove();
+    }
 
-            // Adicionar o id da tarefa como campo oculto
-            let inputId = document.createElement('input');
-            inputId.type = 'hidden';
-            inputId.name = 'task_id';
-            inputId.value = id;
-            document.getElementById('task-form-content').appendChild(inputId);
-        }
+    // Adicionar o id da tarefa como campo oculto
+    let inputId = document.createElement('input');
+    inputId.type = 'hidden';
+    inputId.name = 'task_id';
+    inputId.value = id;
+    document.getElementById('task-form-content').appendChild(inputId);
+}
 
-        // Fechar o formulário
-        document.getElementById('cancel').addEventListener('click', function() {
-            document.getElementById('task-form').style.display = 'none';
-        });
+// Fechar o formulário
+document.getElementById('cancel').addEventListener('click', function() {
+    document.getElementById('task-form').style.display = 'none';
+});
 
         document.getElementById('save-category').addEventListener('click', function() {
     // Submete o formulário manualmente
     document.getElementById('task-form-content').submit();
 });
+
+// Verifica se a categoria foi filtrada
+$categoryFilter = isset($_GET['category']) ? $_GET['category'] : '';
+
+// Adiciona a cláusula WHERE ao SQL se a categoria for selecionada
+$sql = "SELECT * FROM tbtarefas WHERE user_id = :user_id";
+if ($categoryFilter != '') {
+    $sql .= " AND category_id = :category_id";
+}
+
+$stmt = $pdo->prepare($sql);
+
+// Parâmetros para a consulta
+$params = [':user_id' => $user_id];
+if ($categoryFilter != '') {
+    $params[':category_id'] = $categoryFilter;
+}
+
+$stmt->execute($params);
+$tasks = $stmt->fetchAll();
+
 
     </script>
 

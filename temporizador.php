@@ -49,6 +49,14 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
+
+        /* Ajustando o espaçamento e o layout */
+#main-content {
+    flex-grow: 1;
+    margin-left: 82px;
+    padding: 20px;
+    width: calc(100% - 82px);
+}
         .timer-card {
             background-color: #1e1e1e;
             color: #fff;
@@ -78,8 +86,8 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <?php include 'sidebar.php'; ?>
 
-    <div class="container mt-5">
-        <h2>Temporizador</h2>
+    <div id="main-content">
+    <h1 class="mb-4"> Temporizador</h1>
         <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#timerModal"
                 onclick="
                     document.getElementById('timer_id').value='';

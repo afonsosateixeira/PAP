@@ -15,14 +15,20 @@ if (!isset($_SESSION['user_id'])) {
     <title>Relógio Mundial</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .world-clock { margin-top: 50px; }
+                /* Ajustando o espaçamento e o layout */
+#main-content {
+    flex-grow: 1;
+    margin-left: 82px;
+    padding: 20px;
+    width: calc(100% - 82px);
+}
     </style>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
 
-    <div class="container world-clock">
-        <h2>Relógio Mundial</h2>
+    <div id="main-content">
+    <h1 class="mb-4"> Relógio Mundial</h1>
         <div class="mb-3">
             <select id="timezone-select" class="form-select">
                 <option value="Europe/London">Londres</option>

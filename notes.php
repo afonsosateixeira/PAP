@@ -87,7 +87,8 @@ $notes = $stmt->fetchAll();
             width: 400px;
             max-width: 100%;
             font-family: Arial, sans-serif;
-            text-align: left; /* Alinha os textos à esquerda */
+            text-align: left; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         /* Estilizando os campos do formulário */

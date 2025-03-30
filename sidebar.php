@@ -251,6 +251,8 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
                 </a>
             </li>
 
+            <li class="separator"></li>
+
             <li class="side-section">Notas</li>
             <li class="side-item small-item">
                 <a href="tarefas.php">
@@ -328,25 +330,55 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
 </nav>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Verificar o estado no localStorage e aplicar ao carregar a página
+    const sidebar = document.getElementById('sidebar');
+    const openBtnIcon = document.getElementById('open_btn_icon');
+    const sidebarState = localStorage.getItem('sidebarState');
+
+    // Se o estado estiver no localStorage, aplicamos
+    if (sidebarState === 'minimized') {
+        sidebar.classList.remove('open-sidebar');  // Sidebar minimizada
+        openBtnIcon.classList.remove('fa-chevron-left');
+        openBtnIcon.classList.add('fa-chevron-right');
+    } else {
+        sidebar.classList.add('open-sidebar');  // Sidebar maximizada
+        openBtnIcon.classList.remove('fa-chevron-right');
+        openBtnIcon.classList.add('fa-chevron-left');
+    }
+
+    // Adicionar funcionalidade de minimizar/maximizar ao botão
     document.getElementById('open_btn').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('open-sidebar');
+        sidebar.classList.toggle('open-sidebar');
+        const isOpen = sidebar.classList.contains('open-sidebar');
+
+        // Salvar o estado no localStorage
+        if (isOpen) {
+            localStorage.setItem('sidebarState', 'maximized'); // Sidebar maximizada
+        } else {
+            localStorage.setItem('sidebarState', 'minimized'); // Sidebar minimizada
+        }
+
+        // Alternar o ícone do botão para mostrar a ação de expandir ou retrair
+        openBtnIcon.classList.toggle('fa-chevron-right');
+        openBtnIcon.classList.toggle('fa-chevron-left');
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
-        // Obtém a URL atual
-        const currentPage = window.location.pathname.split("/").pop();
+    // Obtém a URL atual
+    const currentPage = window.location.pathname.split("/").pop();
 
-        // Define os itens do menu
-        const menuItems = document.querySelectorAll('.side-item a');
+    // Define os itens do menu
+    const menuItems = document.querySelectorAll('.side-item a');
 
-        // Loop sobre cada item de menu e verifica se o link corresponde à página atual
-        menuItems.forEach(item => {
-            const link = item.getAttribute('href').split("/").pop();
-            if (link === currentPage) {
-                item.closest('.side-item').classList.add('active');
-            }
-        });
+    // Loop sobre cada item de menu e verifica se o link corresponde à página atual
+    menuItems.forEach(item => {
+        const link = item.getAttribute('href').split("/").pop();
+        if (link === currentPage) {
+            item.closest('.side-item').classList.add('active');
+        }
     });
+});
+
 </script>
 
 </body>
