@@ -147,7 +147,7 @@ foreach ($notes as $note) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.html'; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div id="main-content">
         <div id="navbar">

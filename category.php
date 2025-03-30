@@ -100,12 +100,6 @@ $categories = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <title>Categorias</title>
-
-    <!-- Se ainda não tiver Bootstrap importado no layout principal, descomente:
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    -->
-
     <style>
         /* Modal customizado (posição fixa) */
         #category-modal {

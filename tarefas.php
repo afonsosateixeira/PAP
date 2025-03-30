@@ -45,20 +45,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         header('Location: tarefas.php');
     } else {
-        // Inserir nova tarefa
-        $status = 0;
-        $sql = "INSERT INTO tbtarefas (tituloTarefa, descricaoTarefa, dataconclusao_date, datalembrete_date, recorrenciaTarefa, statusTarefa, category_id) 
-                VALUES (:titulo, :descricao, :dataConclusao, :dataLembrete, :recorrencia, :status, :category_id)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':titulo' => $titulo,
-            ':descricao' => $descricao,
-            ':dataConclusao' => $dataConclusao,
-            ':dataLembrete' => $dataLembrete,
-            ':recorrencia' => $recorrencia,
-            ':status' => $status,
-            ':category_id' => $category_id
-        ]);
+// Inserir nova tarefa
+$status = 0;
+$sql = "INSERT INTO tbtarefas (tituloTarefa, descricaoTarefa, dataconclusao_date, datalembrete_date, recorrenciaTarefa, statusTarefa, category_id, user_id) 
+        VALUES (:titulo, :descricao, :dataConclusao, :dataLembrete, :recorrencia, :status, :category_id, :user_id)";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([
+    ':titulo' => $titulo,
+    ':descricao' => $descricao,
+    ':dataConclusao' => $dataConclusao,
+    ':dataLembrete' => $dataLembrete,
+    ':recorrencia' => $recorrencia,
+    ':status' => $status,
+    ':category_id' => $category_id,
+    ':user_id' => $user_id  // Garantir que o user_id seja passado
+]);
+
     }
 }
 
@@ -77,9 +79,12 @@ if (isset($_GET['status'])) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => $id]);
 }
-// Obter tarefas
-$stmt = $pdo->query("SELECT * FROM tbtarefas");
+
+// Obter tarefas associadas ao usuário logado
+$stmt = $pdo->prepare("SELECT * FROM tbtarefas WHERE user_id = :user_id");
+$stmt->execute([':user_id' => $user_id]);
 $tasks = $stmt->fetchAll();
+
 
 // Editar tarefa
 if (isset($_GET['edit'])) {
@@ -143,7 +148,7 @@ if (isset($_GET['edit'])) {
     </style>
 </head>
 <body>
-<?php include 'sidebar.html'; ?>
+<?php include 'sidebar.php'; ?>
     <div class="container" id="main-content">
         <h1 class="mb-4">Gestor de Tarefas</h1>
         <div class="buttons-container">

@@ -151,7 +151,7 @@ $notes = $stmt->fetchAll();
     </style>
 </head>
 <body>
-<?php include 'sidebar.html'; ?>
+<?php include 'sidebar.php'; ?>
     <main>
     <div class="container" id="main-content">
         <h1 class="mb-4">Agendamento</h1>

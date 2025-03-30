@@ -96,7 +96,7 @@ $nextTask = $stmt5->fetch();
 </head>
 <body>
     <!-- Incluir a sidebar (menu lateral) -->
-    <?php include 'sidebar.html'; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div id="main-content">
       <div class="container-fluid">

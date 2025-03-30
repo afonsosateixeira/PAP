@@ -6,6 +6,11 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
+ALTER TABLE users 
+ADD COLUMN profile_picture VARCHAR(255) DEFAULT 'assets/images/default.png',
+ADD COLUMN description VARCHAR(255) DEFAULT 'Bem-vindo!';
+
+
 -- Criando a tabela de categorias
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,7 +45,6 @@ CREATE TABLE sessions (
 -- Criando a tabela de tarefas
 CREATE TABLE tbtarefas (
     idTarefa INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
     tituloTarefa VARCHAR(255) NOT NULL,
     descricaoTarefa TEXT NOT NULL,
     recorrenciaTarefa INT NOT NULL DEFAULT '0',
@@ -48,9 +52,16 @@ CREATE TABLE tbtarefas (
     dataconclusao_date DATETIME NULL,
     datalembrete_date DATETIME NULL,
     category_id INT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
+ALTER TABLE tbtarefas
+ADD COLUMN user_id INT NOT NULL;
+
+
+ALTER TABLE tbtarefas
+ADD CONSTRAINT fk_user_id
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
 
 -- Criando a tabela de alarmes
 CREATE TABLE alarms (
@@ -70,3 +81,11 @@ CREATE TABLE timers (
     duration INT NOT NULL COMMENT 'Duração em segundos',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+ALTER TABLE timers
+ADD COLUMN name VARCHAR(255) NOT NULL AFTER user_id;
+
+ALTER TABLE alarms
+ADD COLUMN active TINYINT(1) NOT NULL DEFAULT 1,
+ADD COLUMN days_of_week VARCHAR(50) DEFAULT NULL;
+
