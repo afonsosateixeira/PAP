@@ -1,13 +1,3 @@
-<?php
-session_start();
-require 'config.php';
-
-// Verificar se o usuário está autenticado
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -15,10 +5,14 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cronômetro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         #timer {
-            font-size: 3em;
-            margin-top: 20px;
+            font-size: 6em;
+            margin-top: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #main-content {
@@ -28,26 +22,46 @@ if (!isset($_SESSION['user_id'])) {
             width: calc(100% - 82px);
         }
 
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn-custom {
+            background-color: #71b9f0; 
+            border-radius: 50px;
+            color: white;
+            font-size: 1.5rem; 
+            padding: 10px 20px; 
+        }
+
+        .btn-custom:hover {
+            background-color: #71b9f0; 
+        }
+
         table {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
-            background-color: #333;
-            color: white;
+            background-color: #fff;
+            color: black;
+            display: none; /* A tabela fica oculta inicialmente */
         }
 
         table, th, td {
-            border: 1px solid #fff;
+            border: none;
+        }
+
+        th, td {
             padding: 10px;
             text-align: center;
         }
 
-        th, td {
-            color: white;
-        }
-
-        button {
-            margin: 5px;
+        th {
+            border-bottom: 2px solid #ccc;
+            color: black;
         }
 
         #lap-times {
@@ -59,15 +73,16 @@ if (!isset($_SESSION['user_id'])) {
 <?php include 'sidebar.php'; ?>
 
     <div id="main-content">
-        <h1>Cronômetro</h1>
         <h2 id="timer">00:00:00,00</h2>
-        <button class="btn btn-success" id="startPauseBtn">Iniciar</button>
-        <button class="btn btn-primary" id="lapBtn">Registrar Volta</button>
-        <button class="btn btn-warning" id="resetBtn">Resetar</button>
+
+        <div class="button-container">
+            <button class="btn btn-custom" id="startPauseBtn"><i class="fa fa-play"></i></button>
+            <button class="btn btn-custom" id="lapBtn"><i class="fa fa-flag"></i></button>
+            <button class="btn btn-custom" id="resetBtn"><i class="fa fa-rotate-left"></i></button>
+        </div>
 
         <div id="lap-times">
-            <h4>Voltadas</h4>
-            <table>
+            <table id="lapTable">
                 <thead>
                     <tr>
                         <th>Voltas</th>
@@ -87,106 +102,105 @@ if (!isset($_SESSION['user_id'])) {
         let lapCounter = 1;
         let elapsedTime = 0;
         let totalTime = 0;
+        let lastLapTime = 0;
+        let debounceTimeout; 
 
         // Função para iniciar/pausar o cronômetro
         function startPauseTimer() {
             if (!running) {
                 startTime = new Date().getTime() - elapsedTime;
-                tInterval = setInterval(updateTimer, 10);
-                document.getElementById('startPauseBtn').innerText = "Pausar";
                 running = true;
+                requestAnimationFrame(updateTimer);
+                document.getElementById('startPauseBtn').innerHTML = '<i class="fa fa-pause"></i>';
             } else {
-                clearInterval(tInterval);
-                document.getElementById('startPauseBtn').innerText = "Iniciar";
                 running = false;
+                document.getElementById('startPauseBtn').innerHTML = '<i class="fa fa-play"></i>';
             }
         }
 
         // Função para resetar o cronômetro
         function resetTimer() {
-            clearInterval(tInterval);
             running = false;
             elapsedTime = 0;
             totalTime = 0;
             lapCounter = 1;
+            lastLapTime = 0;
             document.getElementById('timer').innerHTML = '00:00:00,00';
-            document.getElementById('lapList').innerHTML = ''; // Limpa as voltas
-            document.getElementById('startPauseBtn').innerText = "Iniciar";
+            document.getElementById('lapList').innerHTML = ''; 
+            document.getElementById('startPauseBtn').innerHTML = '<i class="fa fa-play"></i>';
+            document.getElementById('lapTable').style.display = 'none'; 
         }
 
-        // Função para atualizar o cronômetro
+        // Função para atualizar o cronômetro de forma mais fluida com requestAnimationFrame
         function updateTimer() {
-            elapsedTime = new Date().getTime() - startTime;
-            let hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
-            let minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
-            let seconds = Math.floor((elapsedTime / 1000) % 60);
-            let milliseconds = Math.floor((elapsedTime % 1000) / 10);
+            if (running) {
+                elapsedTime = new Date().getTime() - startTime;
+                let hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+                let minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+                let seconds = Math.floor((elapsedTime / 1000) % 60);
+                let milliseconds = Math.floor((elapsedTime % 1000) / 10);
 
-            document.getElementById('timer').innerHTML = 
-                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(milliseconds).padStart(2, '0')}`;
+                document.getElementById('timer').innerHTML = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(milliseconds).padStart(2, '0')}`;
+
+                requestAnimationFrame(updateTimer); // Chama novamente para atualização contínua
+            }
         }
 
-// Função para formatar o tempo total
-function formatTime(timeInMillis) {
-    let totalSeconds = Math.floor(timeInMillis / 1000);
-    let hours = Math.floor(totalSeconds / 3600);
-    let minutes = Math.floor((totalSeconds % 3600) / 60);
-    let seconds = totalSeconds % 60;
-    let milliseconds = Math.floor((timeInMillis % 1000) / 10); // Para milissegundos
+        // Função para formatar o tempo total
+        function formatTime(timeInMillis) {
+            let totalSeconds = Math.floor(timeInMillis / 1000);
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = totalSeconds % 60;
+            let milliseconds = Math.floor((timeInMillis % 1000) / 10);
 
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(milliseconds).padStart(2, '0')}`;
-}
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(milliseconds).padStart(2, '0')}`; 
+        }
 
-let lastLapTime = 0; // Variável para armazenar o tempo da última volta
+        // Função para registrar a volta
+        function recordLap() {
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
 
-// Função para registrar a volta
-function recordLap() {
-    const lapTimeInMillis = elapsedTime - totalTime; // Tempo da volta em milissegundos
-    totalTime = elapsedTime; // Atualiza o tempo total acumulado
+            debounceTimeout = setTimeout(function() {
+                if (running) { 
+                    const lapTimeInMillis = elapsedTime - totalTime;
+                    totalTime = elapsedTime;
 
-    // Calcula a duração da volta (tempo desde a última volta)
-    let lapDuration = lapTimeInMillis - lastLapTime;
-    lastLapTime = lapTimeInMillis; // Atualiza o tempo da última volta
+                    let lapDuration = lapTimeInMillis - lastLapTime;
+                    lastLapTime = lapTimeInMillis;
 
-    // Formata a duração da volta
-    const lapDurationFormatted = formatTime(lapDuration);
+                    const lapDurationFormatted = formatTime(lapDuration);
+                    const totalTimeFormatted = formatTime(totalTime);
 
-    // Formata o tempo total acumulado
-    const totalTimeFormatted = formatTime(totalTime);
+                    const lapList = document.getElementById('lapList');
+                    const row = document.createElement('tr');
 
-    // Cria uma nova linha para a tabela
-    const lapList = document.getElementById('lapList');
-    const row = document.createElement('tr');
+                    const lapCell = document.createElement('td');
+                    lapCell.innerText = lapCounter++;
+                    row.appendChild(lapCell);
 
-    const lapCell = document.createElement('td');
-    lapCell.innerText = lapCounter++; // Número da volta
-    row.appendChild(lapCell);
+                    const lapDurationCell = document.createElement('td');
+                    lapDurationCell.innerText = lapDurationFormatted;
+                    row.appendChild(lapDurationCell);
 
-    const lapDurationCell = document.createElement('td');
-    lapDurationCell.innerText = lapDurationFormatted; // Duração da volta (tempo entre as voltas)
-    row.appendChild(lapDurationCell);
+                    const totalCell = document.createElement('td');
+                    totalCell.innerText = totalTimeFormatted;
+                    row.appendChild(totalCell);
 
-    const totalCell = document.createElement('td');
-    totalCell.innerText = totalTimeFormatted; // Tempo total acumulado até o momento
-    row.appendChild(totalCell);
+                    lapList.insertBefore(row, lapList.firstChild);
 
-    lapList.insertBefore(row, lapList.firstChild); // Adiciona a linha no topo da tabela
-}
-
+                    document.getElementById('lapTable').style.display = 'table';
+                }
+            }, 200);
+        }
 
         // Eventos dos botões
-        document.getElementById('startPauseBtn').onclick = function() {
-            startPauseTimer();
-        };
-
-        document.getElementById('resetBtn').onclick = function() {
-            resetTimer();
-        };
-
-        document.getElementById('lapBtn').onclick = function() {
-            recordLap();
-        };
-
+        document.getElementById('startPauseBtn').onclick = startPauseTimer;
+        document.getElementById('resetBtn').onclick = resetTimer;
+        document.getElementById('lapBtn').onclick = recordLap;
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

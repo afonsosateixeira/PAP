@@ -75,3 +75,24 @@ CREATE TABLE timers (
     duration INT NOT NULL COMMENT 'Duração em segundos',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+
+CREATE TABLE reposicao_horas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    disciplina VARCHAR(50) NOT NULL,
+    professor VARCHAR(50) NOT NULL,
+    modulo INT NOT NULL,
+    horas INT NOT NULL,
+    justificativa ENUM('justificada', 'injustificada') NOT NULL,
+    datahora_reposicao DATETIME NULL,
+    nota VARCHAR(255) DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+ALTER TABLE reposicao_horas 
+ADD COLUMN tipo ENUM('horas', 'modulos') NOT NULL DEFAULT 'horas',
+ADD COLUMN status ENUM('pendente', 'concluido') NOT NULL DEFAULT 'pendente';
+ALTER TABLE reposicao_horas MODIFY COLUMN horas INT NULL;

@@ -251,6 +251,13 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
                 </a>
             </li>
 
+            <li class="side-item small-item">
+                <a href="modulos.php">
+                    <i class="fas fa-school"></i>
+                    <span class="item-description">Escola</span>
+                </a>
+            </li>
+
             <li class="separator"></li>
 
             <li class="side-section">Notas</li>
@@ -295,7 +302,7 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
                 </a>
             </li>
             <li class="side-item small-item">
-                <a href="relogio-mundial.php">
+                <a href="relogio-universal.php">
                     <i class="fa fa-globe"></i>
                     <span class="item-description">Relógio Universal</span>
                 </a>
@@ -303,7 +310,6 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
 
             <li class="separator"></li>
 
-            <!-- Configurações antes do Logout -->
             <li class="side-item">
                 <a href="configuration.php">
                     <i class="fa-solid fa-gear"></i>

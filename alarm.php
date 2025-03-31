@@ -64,7 +64,7 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Alarmes</title>
+    <title>Alarme</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -79,19 +79,21 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
 
 /* Estilos para os alarmes */
 .alarm-card {
-    background-color: #1e1e1e;
-    color: #fff;
+    background-color: #ffffff; /* Fundo branco */
+    color: #000000; /* Texto preto */
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Mantendo sombra suave */
     transition: box-shadow 0.3s ease;
     margin: 10px;
 }
 
 .alarm-card:hover {
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Sombra mais intensa ao passar o mouse */
 }
 
+/* Ajustando o título e o conteúdo */
 .card-header { 
     display: flex; 
     justify-content: space-between; 
@@ -101,12 +103,13 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
 .card-title { 
     font-weight: bold; 
     font-size: 1rem; 
+    color: #000000; /* Texto do título em preto */
 }
 
 .edit-btn, .toggle-btn { 
     background: none; 
     border: none; 
-    color: #fff; 
+    color: #000000; /* Ícones dos botões em preto */
     cursor: pointer; 
 }
 
@@ -114,14 +117,24 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
     font-size: 2rem; 
     text-align: center; 
     margin: 10px 0; 
+    color: #000000; /* Hora em preto */
 }
 
 .card-subtitle { 
     text-align: center; 
     font-size: 0.9rem; 
-    color: #ccc; 
+    color: #666; /* Cor mais suave para a legenda */
 }
 
+/* Ajustando a cor do botão de alternância do alarme */
+.toggle-btn i {
+    color: #000000; /* Ícones de alternância em preto */
+}
+
+/* Alterando a cor do botão de editar */
+.edit-btn i {
+    color: #000000; /* Ícone de editar em preto */
+}
 .alarm-notification {
     position: fixed;
     top: 20px;

@@ -151,7 +151,7 @@ $nextTask = $stmt5->fetch();
 
         <!-- “Box diferente” para o Gestor de Categorias -->
         <div class="card mb-4">
-          <div class="card-header bg-dark text-white">
+          <div class="card-header">
             <h5 class="mb-0">Gestor de Categorias</h5>
           </div>
           <div class="card-body">

@@ -34,7 +34,7 @@ foreach ($notes as $note) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendário Simples</title>
+    <title>Calendário</title>
     <style>
         #main-content {
             flex-grow: 1;

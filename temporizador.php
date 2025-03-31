@@ -46,28 +46,28 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Temporizador</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-
         /* Ajustando o espaçamento e o layout */
-#main-content {
-    flex-grow: 1;
-    margin-left: 82px;
-    padding: 20px;
-    width: calc(100% - 82px);
-}
+        #main-content {
+            flex-grow: 1;
+            margin-left: 82px;
+            padding: 20px;
+            width: calc(100% - 82px);
+        }
         .timer-card {
-            background-color: #1e1e1e;
-            color: #fff;
+            background-color: #ffffff; /* Fundo branco */
+            color: #000000; /* Texto preto */
             width: 250px;
             border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             padding: 10px;
             margin: 10px;
         }
         .card-header { display: flex; justify-content: space-between; align-items: center; }
         .card-title { font-weight: bold; font-size: 1rem; }
-        .edit-btn, .toggle-btn { background: none; border: none; color: #fff; cursor: pointer; }
+        .edit-btn, .toggle-btn { background: none; border: none; color: #000000; cursor: pointer; }
         .timer-display {
             margin: 0 auto;
             width: 130px;
@@ -80,7 +80,23 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
             font-size: 1.2rem;
             font-weight: bold;
         }
-        .timer-controls { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .timer-controls { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+
+        /* Novo estilo para os botões de play/pause e reset */
+.timer-controls button {
+    background: none;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
+
+.timer-controls button:hover {
+    background-color: #f0f0f0;
+}
+
     </style>
 </head>
 <body>
@@ -89,11 +105,7 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
     <div id="main-content">
     <h1 class="mb-4"> Temporizador</h1>
         <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#timerModal"
-                onclick="
-                    document.getElementById('timer_id').value='';
-                    document.getElementById('timer_name').value='';
-                    document.getElementById('timer_duration').value='';
-                ">
+                onclick="document.getElementById('timer_id').value=''; document.getElementById('timer_name').value=''; document.getElementById('timer_duration').value='';">
             <i class="fa fa-plus"></i> Criar Temporizador
         </button>
 
@@ -108,11 +120,9 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                     <span class="card-title"><?php echo $timerName; ?></span>
                     <div>
                         <button class="edit-btn me-2" data-bs-toggle="modal" data-bs-target="#timerModal"
-                                onclick="
-                                    document.getElementById('timer_id').value='<?php echo $timerId; ?>';
-                                    document.getElementById('timer_name').value='<?php echo $timerName; ?>';
-                                    document.getElementById('timer_duration').value='<?php echo floor($durationSeconds/60); ?>';
-                                ">
+                                onclick="document.getElementById('timer_id').value='<?php echo $timerId; ?>';
+                                         document.getElementById('timer_name').value='<?php echo $timerName; ?>';
+                                         document.getElementById('timer_duration').value='<?php echo floor($durationSeconds/60); ?>';">
                             <i class="fa fa-pen"></i>
                         </button>
                         <a href="?delete_timer=<?php echo $timerId; ?>" class="toggle-btn">
@@ -122,9 +132,12 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 <div class="timer-display">00:00:00</div>
                 <div class="timer-controls">
-                    <button onclick="playTimer('<?php echo $timerId; ?>')"><i class="fa fa-play"></i></button>
-                    <button onclick="stopTimer('<?php echo $timerId; ?>')"><i class="fa fa-stop"></i></button>
-                    <button onclick="resetTimer('<?php echo $timerId; ?>')"><i class="fa fa-rotate-left"></i></button>
+                    <button class="btn-play-pause" onclick="togglePlayPause('<?php echo $timerId; ?>')">
+                        <i class="fa fa-play"></i>
+                    </button>
+                    <button class="btn-reset" onclick="resetTimer('<?php echo $timerId; ?>')">
+                        <i class="fa fa-rotate-left"></i>
+                    </button>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -162,7 +175,6 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Scripts para os temporizadores -->
     <script>
-        // Armazena dados de cada temporizador
         let timerData = {};
         function initTimers() {
             const timerCards = document.querySelectorAll('.timer-card');
@@ -173,6 +185,7 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                 updateTimerDisplay(timerId);
             });
         }
+
         function updateTimerDisplay(timerId) {
             const card = document.querySelector(`.timer-card[data-timer-id="${timerId}"]`);
             if (!card) return;
@@ -183,6 +196,21 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
             const ss = String(remaining % 60).padStart(2,'0');
             display.textContent = `${hh}:${mm}:${ss}`;
         }
+
+        function togglePlayPause(timerId) {
+            const card = document.querySelector(`.timer-card[data-timer-id="${timerId}"]`);
+            const playPauseBtn = card.querySelector('.btn-play-pause');
+            if (timerData[timerId].intervalRef) {
+                stopTimer(timerId);
+                playPauseBtn.innerHTML = '<i class="fa fa-play"></i>';
+                playPauseBtn.classList.remove('stop');
+            } else {
+                playTimer(timerId);
+                playPauseBtn.innerHTML = '<i class="fa fa-pause"></i>';
+                playPauseBtn.classList.add('stop');
+            }
+        }
+
         function playTimer(timerId) {
             if (timerData[timerId].intervalRef) return;
             timerData[timerId].intervalRef = setInterval(() => {
@@ -195,17 +223,20 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                 }
             }, 1000);
         }
+
         function stopTimer(timerId) {
             if (timerData[timerId].intervalRef) {
                 clearInterval(timerData[timerId].intervalRef);
                 timerData[timerId].intervalRef = null;
             }
         }
+
         function resetTimer(timerId) {
             stopTimer(timerId);
             timerData[timerId].remainingSeconds = timerData[timerId].initialSeconds;
             updateTimerDisplay(timerId);
         }
+
         window.addEventListener('DOMContentLoaded', initTimers);
     </script>
 
