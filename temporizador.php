@@ -14,8 +14,10 @@ $user_id = $_SESSION['user_id'];
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_timer'])) {
     $timer_id = isset($_POST['timer_id']) ? intval($_POST['timer_id']) : 0;
     $name = trim($_POST['timer_name']);
-    $duration_minutes = intval($_POST['timer_duration']);
-    $duration_seconds = $duration_minutes * 60;
+    $hours = intval($_POST['timer_hours']);
+    $minutes = intval($_POST['timer_minutes']);
+    $seconds = intval($_POST['timer_seconds']);
+    $duration_seconds = ($hours * 3600) + ($minutes * 60) + $seconds;
 
     if ($timer_id > 0) {
         $stmt = $pdo->prepare("UPDATE timers SET name = ?, duration = ? WHERE id = ? AND user_id = ?");
@@ -48,7 +50,6 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        /* Ajustando o espaçamento e o layout */
         #main-content {
             flex-grow: 1;
             margin-left: 82px;
@@ -56,8 +57,8 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
             width: calc(100% - 82px);
         }
         .timer-card {
-            background-color: #ffffff; /* Fundo branco */
-            color: #000000; /* Texto preto */
+            background-color: #ffffff;
+            color: #000000;
             width: 250px;
             border-radius: 8px;
             border: 1px solid #ddd;
@@ -82,30 +83,39 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
         }
         .timer-controls { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
 
-        /* Novo estilo para os botões de play/pause e reset */
-.timer-controls button {
-    background: none;
-    border: none;
-    color: #000000;
-    cursor: pointer;
-    font-size: 1.2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s;
-}
+        .timer-controls button {
+            background: none;
+            border: none;
+            color: #000000;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
 
-.timer-controls button:hover {
-    background-color: #f0f0f0;
-}
+        .timer-controls button:hover {
+            background-color: #f0f0f0;
+        }
 
+        .time-input {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .time-input input {
+            width: 50px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
 
     <div id="main-content">
-    <h1 class="mb-4"> Temporizador</h1>
+    <h1 class="mb-4">Temporizador</h1>
         <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#timerModal"
-                onclick="document.getElementById('timer_id').value=''; document.getElementById('timer_name').value=''; document.getElementById('timer_duration').value='';">
+                onclick="document.getElementById('timer_id').value=''; document.getElementById('timer_name').value=''; document.getElementById('timer_hours').value='00'; document.getElementById('timer_minutes').value='00'; document.getElementById('timer_seconds').value='00';">
             <i class="fa fa-plus"></i> Criar Temporizador
         </button>
 
@@ -114,6 +124,9 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                 $timerId = $timer['id'];
                 $timerName = htmlspecialchars($timer['name']);
                 $durationSeconds = intval($timer['duration']);
+                $hours = floor($durationSeconds / 3600);
+                $minutes = floor(($durationSeconds % 3600) / 60);
+                $seconds = $durationSeconds % 60;
             ?>
             <div class="timer-card" data-timer-id="<?php echo $timerId; ?>" data-duration="<?php echo $durationSeconds; ?>">
                 <div class="card-header">
@@ -122,7 +135,9 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                         <button class="edit-btn me-2" data-bs-toggle="modal" data-bs-target="#timerModal"
                                 onclick="document.getElementById('timer_id').value='<?php echo $timerId; ?>';
                                          document.getElementById('timer_name').value='<?php echo $timerName; ?>';
-                                         document.getElementById('timer_duration').value='<?php echo floor($durationSeconds/60); ?>';">
+                                         document.getElementById('timer_hours').value='<?php echo str_pad($hours, 2, '0', STR_PAD_LEFT); ?>';
+                                         document.getElementById('timer_minutes').value='<?php echo str_pad($minutes, 2, '0', STR_PAD_LEFT); ?>';
+                                         document.getElementById('timer_seconds').value='<?php echo str_pad($seconds, 2, '0', STR_PAD_LEFT); ?>';">
                             <i class="fa fa-pen"></i>
                         </button>
                         <a href="?delete_timer=<?php echo $timerId; ?>" class="toggle-btn">
@@ -130,7 +145,7 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                         </a>
                     </div>
                 </div>
-                <div class="timer-display">00:00:00</div>
+                <div class="timer-display"><?php echo str_pad($hours, 2, '0', STR_PAD_LEFT); ?>:<?php echo str_pad($minutes, 2, '0', STR_PAD_LEFT); ?>:<?php echo str_pad($seconds, 2, '0', STR_PAD_LEFT); ?></div>
                 <div class="timer-controls">
                     <button class="btn-play-pause" onclick="togglePlayPause('<?php echo $timerId; ?>')">
                         <i class="fa fa-play"></i>
@@ -160,8 +175,14 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                 <input type="text" class="form-control" id="timer_name" name="timer_name" required>
               </div>
               <div class="mb-3">
-                <label for="timer_duration" class="form-label">Duração (em minutos)</label>
-                <input type="number" class="form-control" id="timer_duration" name="timer_duration" min="1" required>
+                <label for="timer_duration" class="form-label">Duração</label>
+                <div class="time-input">
+                    <input type="number" id="timer_hours" name="timer_hours" value="00" min="0" max="23" required>
+                    <span>:</span>
+                    <input type="number" id="timer_minutes" name="timer_minutes" value="00" min="0" max="59" required>
+                    <span>:</span>
+                    <input type="number" id="timer_seconds" name="timer_seconds" value="00" min="0" max="59" required>
+                </div>
               </div>
             </div>
             <div class="modal-footer">

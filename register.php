@@ -3,18 +3,31 @@ session_start();
 require 'config.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $name = htmlspecialchars($_POST['name']);
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'];
+
+    // Verificar se o email já existe
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        echo "<script>alert('Email já cadastrado!'); window.location.href='register.php';</script>";
+        exit();
+    }
+
+    // Criar hash da senha
+    $hash = password_hash($password, PASSWORD_DEFAULT);
     
+    // Inserir usuário no banco
     $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-    if ($stmt->execute([$name, $email, $password])) {
+    if ($stmt->execute([$name, $email, $hash])) {
         echo "<script>alert('Conta criada com sucesso!'); window.location.href='login.php';</script>";
     } else {
         echo "<script>alert('Erro ao criar conta!'); window.location.href='register.php';</script>";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-pt">

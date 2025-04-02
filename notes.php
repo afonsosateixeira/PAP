@@ -153,7 +153,7 @@ $notes = $stmt->fetchAll();
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
-    <main>
+<main>
     <div class="container" id="main-content">
         <h1 class="mb-4">Agendamento</h1>
         <div class="buttons-container">
@@ -194,10 +194,11 @@ $notes = $stmt->fetchAll();
                     <input type="datetime-local" id="note-date" name="schedule_date" class="form-control" required>
                 </div>
 
-                <button type="button" id="save-note" class="btn btn-success w-100"> Salvar</button>
+                <button type="button" id="save-note" class="btn btn-success w-100">Salvar</button>
                 <button type="button" id="cancel-note" class="btn btn-danger w-100 mt-3">Cancelar</button>
             </form>
         </div>
+
         <!-- Container de Notas -->
         <div class="notes-container" id="notes-container">
             <?php foreach ($notes as $note): ?>
@@ -312,8 +313,7 @@ $notes = $stmt->fetchAll();
     }
 </script>
 
-
-    <!-- Inclusão do Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0p3p5hK/ihpJ2duLRf72jjrCXY5z2v+b+gYbbhAiYZwpx+Yg" crossorigin="anonymous"></script>
+<!-- Inclusão do Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0p3p5hK/ihpJ2duLRf72jjrCXY5z2v+b+gYbbhAiYZwpx+Yg" crossorigin="anonymous"></script>
 </body>
 </html>

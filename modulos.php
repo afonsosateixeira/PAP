@@ -65,7 +65,6 @@ $stmtModulos = $pdo->prepare("SELECT * FROM reposicao_horas WHERE user_id = ? AN
 $stmtModulos->execute([$_SESSION['user_id']]);
 $reposicoes_modulos = $stmtModulos->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -80,209 +79,106 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
             padding: 20px;
             width: calc(100% - 82px);
         }
-        .modal-custom {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content-custom {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            width: 500px;
-            max-width: 100%;
-        }
-        .modal-custom .close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .form-control {
-            margin-bottom: 10px;
-        }
         .status-checkbox {
             width: 20px;
             height: 20px;
             cursor: pointer;
         }
-        .btn-info {
-            background-color: white;
-            color: #007bff;
-            border: 1px solid #007bff;
-            box-shadow: 0px 4px 6px rgba(0, 123, 255, 0.1);
-        }
-        .btn-info:hover {
-            background-color: #007bff;
-            color: white;
-        }
-        .modal-body button {
-            margin-bottom: 10px;
-        }
         .form-label {
             font-weight: bold;
         }
     </style>
-    <script>
-        function selecionarTipo(tipo) {
-            document.getElementById('form-horas').style.display = (tipo === 'horas') ? 'block' : 'none';
-            document.getElementById('form-modulos').style.display = (tipo === 'modulos') ? 'block' : 'none';
-        }
-
-        function preencherFormulario(reposicao) {
-            if (reposicao.tipo === 'horas') {
-                document.querySelector('#form-horas input[name=modulo]').value = reposicao.modulo;
-                document.querySelector('#form-horas input[name=horas]').value = reposicao.horas;
-                document.querySelector('#form-horas select[name=disciplina]').value = reposicao.disciplina;
-                document.querySelector('#form-horas select[name=professor]').value = reposicao.professor;
-                document.querySelector('#form-horas select[name=justificativa]').value = reposicao.justificativa;
-                document.querySelector('#form-horas input[name=datahora_reposicao]').value = reposicao.datahora_reposicao;
-                document.querySelector('#form-horas input[name="reposicao-id"]').value = reposicao.id;
-            } else if (reposicao.tipo === 'modulos') {
-                document.querySelector('#form-modulos input[name=modulo]').value = reposicao.modulo;
-                document.querySelector('#form-modulos select[name=disciplina]').value = reposicao.disciplina;
-                document.querySelector('#form-modulos select[name=professor]').value = reposicao.professor;
-                document.querySelector('#form-modulos select[name=justificativa]').value = reposicao.justificativa;
-                document.querySelector('#form-modulos input[name=datahora_reposicao]').value = reposicao.datahora_reposicao;
-                document.querySelector('#form-modulos input[name="reposicao-id"]').value = reposicao.id;
-            }
-            selecionarTipo(reposicao.tipo);
-            toggleModal();
-        }
-
-        function toggleModal() {
-            var modal = document.getElementById('modal-reposicao');
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function updateStatus(id, checkbox) {
-            var newStatus = checkbox.checked ? 'concluido' : 'pendente';
-            fetch('?action=toggleStatus&id=' + id + '&status=' + newStatus)
-            .then(response => response.text())
-            .then(result => {
-                if(result.trim() === 'success') {
-                    document.getElementById('status-text-' + id).innerText = newStatus;
-                } else {
-                    alert('Erro ao atualizar o status.');
-                    checkbox.checked = !checkbox.checked;
-                }
-            })
-            .catch(err => {
-                alert('Erro na requisição.');
-                checkbox.checked = !checkbox.checked;
-            });
-        }
-    </script>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
     <div id="main-content">
         <h1 class="mb-4">Gestor de Reposição</h1>
-        <button class="btn btn-success mb-4" onclick="toggleModal()"> Criar Reposição</button>
+
+        <!-- Botões para criar reposição -->
+        <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#modal-reposicao" onclick="selecionarTipo('horas')">Criar Reposição de Horas</button>
+        <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#modal-reposicao" onclick="selecionarTipo('modulos')">Criar Reposição de Módulos</button>
 
         <!-- Modal -->
-        <div class="modal-custom" id="modal-reposicao">
-            <div class="modal-content-custom">
-                <div class="modal-header">
-                    <h5 class="modal-title">Escolher Tipo de Reposição</h5>
-                    <span class="close" onclick="toggleModal()">×</span>
-                </div>
-                <div class="modal-body">
-                    <button class="btn btn-info" onclick="selecionarTipo('horas')">Reposição de Horas</button>
-                    <button class="btn btn-info" onclick="selecionarTipo('modulos')">Reposição de Módulos</button>
+        <div class="modal fade" id="modal-reposicao" tabindex="-1" aria-labelledby="modal-reposicaoLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-reposicaoLabel">Escolher Tipo de Reposição</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Formulário para horas -->
+                        <form method="POST" id="form-horas" style="display:none;">
+                            <input type="hidden" name="tipo" value="horas">
+                            <input type="hidden" name="reposicao-id" id="reposicao-id-horas">
+                            <label for="disciplina-horas" class="form-label">Disciplina</label>
+                            <select name="disciplina" id="disciplina-horas" class="form-control" required>
+                                <option value="">Selecione a disciplina</option>
+                                <?php foreach ($disciplinas as $disciplina): ?>
+                                    <option value="<?= $disciplina ?>"><?= $disciplina ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="professor-horas" class="form-label">Professor</label>
+                            <select name="professor" id="professor-horas" class="form-control" required>
+                                <option value="">Selecione o professor</option>
+                                <?php foreach ($professores as $professor): ?>
+                                    <option value="<?= $professor ?>"><?= $professor ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="modulo-horas" class="form-label">Módulo</label>
+                            <input type="number" name="modulo" id="modulo-horas" class="form-control" placeholder="Módulo" required>
+                            <label for="horas-horas" class="form-label">Horas</label>
+                            <input type="number" name="horas" id="horas-horas" class="form-control" placeholder="Horas" required>
+                            <label for="justificativa-horas" class="form-label">Justificativa</label>
+                            <select name="justificativa" id="justificativa-horas" class="form-control" required>
+                                <option value="">Selecione a justificativa</option>
+                                <?php foreach ($justificativas as $justificativa): ?>
+                                    <option value="<?= $justificativa ?>"><?= $justificativa ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="datahora_reposicao-horas" class="form-label">Data/Hora da Reposição</label>
+                            <input type="datetime-local" name="datahora_reposicao" id="datahora_reposicao-horas" class="form-control" required>
+                            <button type="submit" class="btn btn-success w-100 mt-3">Salvar</button>
+                        </form>
 
-                    <!-- Formulário para horas -->
-                    <form method="POST" id="form-horas" style="display:none;">
-                        <input type="hidden" name="tipo" value="horas">
-                        <label for="disciplina-horas" class="form-label">Disciplina</label>
-                        <select name="disciplina" id="disciplina-horas" class="form-control" required>
-                            <option value="">Selecione a disciplina</option>
-                            <?php foreach ($disciplinas as $disciplina): ?>
-                                <option value="<?= $disciplina ?>"><?= $disciplina ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        
-                        <label for="professor-horas" class="form-label">Professor</label>
-                        <select name="professor" id="professor-horas" class="form-control" required>
-                            <option value="">Selecione o professor</option>
-                            <?php foreach ($professores as $professor): ?>
-                                <option value="<?= $professor ?>"><?= $professor ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        
-                        <label for="modulo-horas" class="form-label">Módulo</label>
-                        <input type="number" name="modulo" id="modulo-horas" class="form-control" placeholder="Módulo" required>
-                        
-                        <label for="horas-horas" class="form-label">Horas</label>
-                        <input type="number" name="horas" id="horas-horas" class="form-control" placeholder="Horas" required>
-                        
-                        <label for="justificativa-horas" class="form-label">Justificativa</label>
-                        <select name="justificativa" id="justificativa-horas" class="form-control" required>
-                            <option value="">Selecione a justificativa</option>
-                            <?php foreach ($justificativas as $justificativa): ?>
-                                <option value="<?= $justificativa ?>"><?= $justificativa ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        
-                        <label for="datahora_reposicao-horas" class="form-label">Data/Hora da Reposição</label>
-                        <input type="datetime-local" name="datahora_reposicao" id="datahora_reposicao-horas" class="form-control" required>
-                        
-                        <button type="submit" class="btn btn-success w-100">Salvar</button>
-                        <button type="button" class="btn btn-danger w-100 mt-2" onclick="toggleModal()">Cancelar</button>
-                        <input type="hidden" name="reposicao-id" value="">
-                    </form>
-
-                    <!-- Formulário para módulos -->
-                    <form method="POST" id="form-modulos" style="display:none;">
-                        <input type="hidden" name="tipo" value="modulos">
-                        
-                        <label for="disciplina-modulos" class="form-label">Disciplina</label>
-                        <select name="disciplina" id="disciplina-modulos" class="form-control" required>
-                            <option value="">Selecione a disciplina</option>
-                            <?php foreach ($disciplinas as $disciplina): ?>
-                                <option value="<?= $disciplina ?>"><?= $disciplina ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        
-                        <label for="professor-modulos" class="form-label">Professor</label>
-                        <select name="professor" id="professor-modulos" class="form-control" required>
-                            <option value="">Selecione o professor</option>
-                            <?php foreach ($professores as $professor): ?>
-                                <option value="<?= $professor ?>"><?= $professor ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        
-                        <label for="modulo-modulos" class="form-label">Módulo</label>
-                        <input type="number" name="modulo" id="modulo-modulos" class="form-control" placeholder="Módulo" required>
-                        
-                        <label for="justificativa-modulos" class="form-label">Justificativa</label>
-                        <select name="justificativa" id="justificativa-modulos" class="form-control" required>
-                            <option value="">Selecione a justificativa</option>
-                            <?php foreach ($justificativas as $justificativa): ?>
-                                <option value="<?= $justificativa ?>"><?= $justificativa ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        
-                        <label for="datahora_reposicao-modulos" class="form-label">Data/Hora da Reposição</label>
-                        <input type="datetime-local" name="datahora_reposicao" id="datahora_reposicao-modulos" class="form-control" required>
-                        
-                        <button type="submit" class="btn btn-success w-100">Salvar</button>
-                        <button type="button" class="btn btn-danger w-100 mt-2" onclick="toggleModal()">Cancelar</button>
-                        <input type="hidden" name="reposicao-id" value="">
-                    </form>
+                        <!-- Formulário para módulos -->
+                        <form method="POST" id="form-modulos" style="display:none;">
+                            <input type="hidden" name="tipo" value="modulos">
+                            <input type="hidden" name="reposicao-id" id="reposicao-id-modulos">
+                            <label for="disciplina-modulos" class="form-label">Disciplina</label>
+                            <select name="disciplina" id="disciplina-modulos" class="form-control" required>
+                                <option value="">Selecione a disciplina</option>
+                                <?php foreach ($disciplinas as $disciplina): ?>
+                                    <option value="<?= $disciplina ?>"><?= $disciplina ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="professor-modulos" class="form-label">Professor</label>
+                            <select name="professor" id="professor-modulos" class="form-control" required>
+                                <option value="">Selecione o professor</option>
+                                <?php foreach ($professores as $professor): ?>
+                                    <option value="<?= $professor ?>"><?= $professor ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="modulo-modulos" class="form-label">Módulo</label>
+                            <input type="number" name="modulo" id="modulo-modulos" class="form-control" placeholder="Módulo" required>
+                            <label for="justificativa-modulos" class="form-label">Justificativa</label>
+                            <select name="justificativa" id="justificativa-modulos" class="form-control" required>
+                                <option value="">Selecione a justificativa</option>
+                                <?php foreach ($justificativas as $justificativa): ?>
+                                    <option value="<?= $justificativa ?>"><?= $justificativa ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="datahora_reposicao-modulos" class="form-label">Data/Hora da Reposição</label>
+                            <input type="datetime-local" name="datahora_reposicao" id="datahora_reposicao-modulos" class="form-control" required>
+                            <button type="submit" class="btn btn-success w-100 mt-3">Salvar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Listagem de reposições -->
-        <h4 class="text-dark font-weight-bold">Reposições de horas</h4>
+        <h4 class="text-dark font-weight-bold">Reposições de Horas</h4>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -300,8 +196,8 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                 <?php foreach ($reposicoes_horas as $reposicao): ?>
                 <tr>
                     <td>
-                    <input type="checkbox" class="status-checkbox" id="status-checkbox-<?= $reposicao['id'] ?>" <?= ($reposicao['status'] == 'concluido' ? 'checked' : '') ?> onchange="updateStatus(<?= $reposicao['id'] ?>, this)">
-                    <span id="status-text-<?= $reposicao['id'] ?>"><?= $reposicao['status'] ?></span>
+                        <input type="checkbox" class="status-checkbox" id="status-checkbox-<?= $reposicao['id'] ?>" <?= ($reposicao['status'] == 'concluido' ? 'checked' : '') ?> onchange="updateStatus(<?= $reposicao['id'] ?>, this)">
+                        <span id="status-text-<?= $reposicao['id'] ?>"><?= $reposicao['status'] ?></span>
                     </td>
                     <td><?= $reposicao['disciplina'] ?></td>
                     <td><?= $reposicao['professor'] ?></td>
@@ -310,7 +206,7 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                     <td><?= $reposicao['justificativa'] ?></td>
                     <td><?= $reposicao['datahora_reposicao'] ?></td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="preencherFormulario(<?= json_encode($reposicao) ?>)">Editar</button>
+                        <button class="btn btn-warning btn-sm" onclick='preencherFormulario(<?= json_encode($reposicao) ?>)'>Editar</button>
                         <a href="?action=delete&id=<?= $reposicao['id'] ?>" class="btn btn-danger btn-sm">Excluir</a>
                     </td>
                 </tr>
@@ -318,7 +214,8 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
             </tbody>
         </table>
 
-        <h4 class="text-dark font-weight-bold">Reposições de módulos</h4>
+        <!-- Reposições de Módulos -->
+        <h4 class="text-dark font-weight-bold">Reposições de Módulos</h4>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -335,8 +232,8 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                 <?php foreach ($reposicoes_modulos as $reposicao): ?>
                 <tr>
                     <td>
-                    <input type="checkbox" class="status-checkbox" id="status-checkbox-<?= $reposicao['id'] ?>" <?= ($reposicao['status'] == 'concluido' ? 'checked' : '') ?> onchange="updateStatus(<?= $reposicao['id'] ?>, this)">
-                    <span id="status-text-<?= $reposicao['id'] ?>"><?= $reposicao['status'] ?></span>
+                        <input type="checkbox" class="status-checkbox" id="status-checkbox-<?= $reposicao['id'] ?>" <?= ($reposicao['status'] == 'concluido' ? 'checked' : '') ?> onchange="updateStatus(<?= $reposicao['id'] ?>, this)">
+                        <span id="status-text-<?= $reposicao['id'] ?>"><?= $reposicao['status'] ?></span>
                     </td>
                     <td><?= $reposicao['disciplina'] ?></td>
                     <td><?= $reposicao['professor'] ?></td>
@@ -344,7 +241,7 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                     <td><?= $reposicao['justificativa'] ?></td>
                     <td><?= $reposicao['datahora_reposicao'] ?></td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="preencherFormulario(<?= json_encode($reposicao) ?>)">Editar</button>
+                        <button class="btn btn-warning btn-sm" onclick='preencherFormulario(<?= json_encode($reposicao) ?>)'>Editar</button>
                         <a href="?action=delete&id=<?= $reposicao['id'] ?>" class="btn btn-danger btn-sm">Excluir</a>
                     </td>
                 </tr>
@@ -352,5 +249,55 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
             </tbody>
         </table>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Ao clicar no botão "Criar", limpar os campos do formulário
+    function selecionarTipo(tipo) {
+        document.getElementById('form-horas').style.display = (tipo === 'horas') ? 'block' : 'none';
+        document.getElementById('form-modulos').style.display = (tipo === 'modulos') ? 'block' : 'none';
+        document.getElementById('form-horas').reset();
+        document.getElementById('form-modulos').reset();
+    }
+
+    // Preencher o formulário ao editar e abrir o modal
+    function preencherFormulario(dados) {
+        selecionarTipo(dados.tipo);
+        
+        if (dados.tipo === 'horas') {
+            document.getElementById('reposicao-id-horas').value = dados.id;
+            document.getElementById('disciplina-horas').value = dados.disciplina;
+            document.getElementById('professor-horas').value = dados.professor;
+            document.getElementById('modulo-horas').value = dados.modulo;
+            document.getElementById('horas-horas').value = dados.horas;
+            document.getElementById('justificativa-horas').value = dados.justificativa;
+            document.getElementById('datahora_reposicao-horas').value = dados.datahora_reposicao;
+        } else {
+            document.getElementById('reposicao-id-modulos').value = dados.id;
+            document.getElementById('disciplina-modulos').value = dados.disciplina;
+            document.getElementById('professor-modulos').value = dados.professor;
+            document.getElementById('modulo-modulos').value = dados.modulo;
+            document.getElementById('justificativa-modulos').value = dados.justificativa;
+            document.getElementById('datahora_reposicao-modulos').value = dados.datahora_reposicao;
+        }
+
+        var modal = new bootstrap.Modal(document.getElementById('modal-reposicao'));
+        modal.show();
+    }
+
+    // Atualizar o status
+    function updateStatus(id, checkbox) {
+        var status = checkbox.checked ? 'concluido' : 'pendente';
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '?action=toggleStatus&id=' + id + '&status=' + status, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                document.getElementById('status-text-' + id).textContent = status;
+            }
+        };
+        xhr.send();
+    }
+</script>
+
 </body>
 </html>

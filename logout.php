@@ -1,10 +1,8 @@
 <?php
 session_start();
-
-// Destrói a sessão e redireciona para a página de login
+session_unset();
 session_destroy();
+setcookie("session", "", time() - 3600, "/", "", true, true);
 header("Location: home.html");
 exit();
 ?>
-
-

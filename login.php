@@ -1,24 +1,39 @@
 <?php
 session_start();
 require 'config.php';
+require 'rate_limit.php'; // Arquivo para limitar tentativas de login
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST['email'];
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'];
-    
+
+    // Verificar tentativas de login
+    if (!limitarTentativas($email)) {
+        echo "<script>alert('Muitas tentativas. Tente novamente mais tarde!'); window.location.href='login.php';</script>";
+        exit();
+    }
+
     $stmt = $pdo->prepare("SELECT id, password FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
-    
+
     if ($user && password_verify($password, $user['password'])) {
+        session_regenerate_id(true); // Prevenir fixação de sessão
         $_SESSION['user_id'] = $user['id'];
+        setcookie("session", session_id(), [
+            "httponly" => true,
+            "secure" => true,
+            "samesite" => "Strict"
+        ]);
         header("Location: index.php");
         exit();
     } else {
+        registrarTentativaFalha($email);
         echo "<script>alert('Email ou senha incorretos!'); window.location.href='login.php';</script>";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-pt">

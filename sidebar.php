@@ -295,18 +295,6 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
                     <span class="item-description">Temporizador</span>
                 </a>
             </li>
-            <li class="side-item small-item">
-                <a href="cronometro.php">
-                    <i class="fa fa-stopwatch"></i>
-                    <span class="item-description">Cronômetro</span>
-                </a>
-            </li>
-            <li class="side-item small-item">
-                <a href="relogio-universal.php">
-                    <i class="fa fa-globe"></i>
-                    <span class="item-description">Relógio Universal</span>
-                </a>
-            </li>
 
             <li class="separator"></li>
 

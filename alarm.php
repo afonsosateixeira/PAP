@@ -365,6 +365,7 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
                 <option value="60">1 hora</option>
             </select>
         </div>
+        
         <button class="btn btn-warning btn-sm" onclick="snoozeAlarm()">Suspender</button>
         <button class="btn btn-secondary btn-sm" onclick="dismissAlarm()">Dispensar</button>
     </div>
@@ -373,3 +374,4 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
