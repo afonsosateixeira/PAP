@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <main>
         <div id="main-content">
             <div class="container">
-                <h2 class="mb-4">Configurações do Perfil</h2>
+                <h2 class="mb-4">Configurações</h2>
                 <form id="profileForm" action="configuration.php" method="POST" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-4 profile-pic-container">
