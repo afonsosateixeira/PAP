@@ -18,19 +18,6 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-          
-        }
-
-        .btn-custom {
-            background-color: #71b9f0; 
-            border-radius: 50px;
-            color: white;
-            font-size: 1.5rem; 
-            padding: 10px 20px; 
-        }
-
-        .btn-custom:hover {
-            background-color: #71b9f0; 
         }
 
     </style>

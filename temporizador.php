@@ -166,7 +166,6 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
           <form method="POST">
             <div class="modal-header">
               <h5 class="modal-title" id="timerModalLabel">Criar/Editar Temporizador</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <input type="hidden" name="timer_id" id="timer_id" value="">
@@ -187,14 +186,13 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary" name="save_timer">Salvar</button>
+              <button type="submit" class="btn btn-success" name="save_timer">Salvar</button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- Scripts para os temporizadores -->
     <script>
         let timerData = {};
         function initTimers() {
@@ -257,7 +255,6 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
             timerData[timerId].remainingSeconds = timerData[timerId].initialSeconds;
             updateTimerDisplay(timerId);
         }
-
         window.addEventListener('DOMContentLoaded', initTimers);
     </script>
 

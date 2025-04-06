@@ -94,17 +94,12 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
     <div id="main-content">
         <h1 class="mb-4">Gestor de Reposição</h1>
 
-        <!-- Botões para criar reposição -->
-        <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#modal-reposicao" onclick="selecionarTipo('horas')">Criar Reposição de Horas</button>
-        <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#modal-reposicao" onclick="selecionarTipo('modulos')">Criar Reposição de Módulos</button>
-
         <!-- Modal -->
         <div class="modal fade" id="modal-reposicao" tabindex="-1" aria-labelledby="modal-reposicaoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modal-reposicaoLabel">Escolher Tipo de Reposição</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title" id="modal-reposicaoLabel">Criar/ Editar Reposição</h5>
                     </div>
                     <div class="modal-body">
                         <!-- Formulário para horas -->
@@ -138,8 +133,11 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                             </select>
                             <label for="datahora_reposicao-horas" class="form-label">Data/Hora da Reposição</label>
                             <input type="datetime-local" name="datahora_reposicao" id="datahora_reposicao-horas" class="form-control" required>
-                            <button type="submit" class="btn btn-success w-100 mt-3">Salvar</button>
-                        </form>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Salvar</button>
+                        </div>
+                    </form>
 
                         <!-- Formulário para módulos -->
                         <form method="POST" id="form-modulos" style="display:none;">
@@ -170,7 +168,10 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                             </select>
                             <label for="datahora_reposicao-modulos" class="form-label">Data/Hora da Reposição</label>
                             <input type="datetime-local" name="datahora_reposicao" id="datahora_reposicao-modulos" class="form-control" required>
-                            <button type="submit" class="btn btn-success w-100 mt-3">Salvar</button>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Salvar</button>
+                        </div>
                         </form>
                     </div>
                 </div>
@@ -178,6 +179,8 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
         </div>
 
         <!-- Listagem de reposições -->
+        <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#modal-reposicao" onclick="selecionarTipo('horas')"><i class="fa fa-plus"></i> Criar Reposição de horas
+        </button>
         <h4 class="text-dark font-weight-bold">Reposições de Horas</h4>
         <table class="table table-bordered">
             <thead>
@@ -215,6 +218,8 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
         </table>
 
         <!-- Reposições de Módulos -->
+        <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#modal-reposicao" onclick="selecionarTipo('modulos')"><i class="fa fa-plus"></i> Criar Reposição de Módulos
+        </button>
         <h4 class="text-dark font-weight-bold">Reposições de Módulos</h4>
         <table class="table table-bordered">
             <thead>

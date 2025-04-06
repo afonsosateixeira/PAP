@@ -35,6 +35,8 @@ foreach ($notes as $note) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário</title>
+    <!-- Adicionar os links do Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         #main-content {
             flex-grow: 1;
@@ -92,58 +94,17 @@ foreach ($notes as $note) {
             padding: 10px;
         }
         .note {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    color: white;
-    padding: 6px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-/* Estilo do modal */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 10; 
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; 
-    background-color: rgba(0, 0, 0, 0.4); 
-}
-
-.modal-content {
-    background-color: white;
-    margin: 15% auto; 
-    padding: 20px;
-    border: 1px solid #888;
-    width: 50%;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-
-
-.note[data-no-category="true"] {
-    background-color: #D3D3D3; /* Cinza claro para notas sem categoria */
-}
-
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            padding: 6px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        .note[data-no-category="true"] {
+            background-color: #D3D3D3; /* Cinza claro para notas sem categoria */
+        }
     </style>
 </head>
 <body>
@@ -178,18 +139,26 @@ foreach ($notes as $note) {
             <div class="day-header">Sáb</div>
         </div>
     </div>
-    <!-- Modal para exibir detalhes da nota -->
-<div id="note-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="modal-title"></h2>
-        <p><strong>Descrição:</strong> <span id="modal-description"></span></p>
-        <p><strong>Data:</strong> <span id="modal-date"></span></p>
-        <p><strong>Categoria:</strong> <span id="modal-category"></span></p>
+
+    <!-- Modal para exibir detalhes da nota utilizando Bootstrap -->
+    <div class="modal fade" id="note-modal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Descrição:</strong> <span id="modal-description"></span></p>
+                    <p><strong>Data:</strong> <span id="modal-date"></span></p>
+                    <p><strong>Categoria:</strong> <span id="modal-category"></span></p>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-
+    <!-- Adicionar os scripts do Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
    document.addEventListener("DOMContentLoaded", function () {
     const calendar = document.querySelector("#calendar");
@@ -197,8 +166,7 @@ foreach ($notes as $note) {
     const prevBtn = document.getElementById("prev");
     const nextBtn = document.getElementById("next");
     const monthLabel = document.getElementById("current-month");
-    const modal = document.getElementById("note-modal");
-    const closeModal = document.querySelector(".close");
+    const modal = new bootstrap.Modal(document.getElementById('note-modal'));
     let currentDate = new Date();
 
     // Campos do modal
@@ -231,7 +199,7 @@ foreach ($notes as $note) {
     }
 
     function renderCalendar(date, notesByDate = {}) {
-        calendar.innerHTML = `
+        calendar.innerHTML = ` 
             <div class='day-header'>Dom</div>
             <div class='day-header'>Seg</div>
             <div class='day-header'>Ter</div>
@@ -282,7 +250,7 @@ foreach ($notes as $note) {
                 modalDescription.textContent = e.currentTarget.getAttribute("data-description");
                 modalDate.textContent = e.currentTarget.getAttribute("data-date");
                 modalCategory.textContent = e.currentTarget.getAttribute("data-category");
-                modal.style.display = "block";
+                modal.show();
             });
         });
     }
@@ -309,20 +277,8 @@ foreach ($notes as $note) {
         updateCalendar();
     });
 
-    closeModal.addEventListener("click", () => {
-        modal.style.display = "none";
-    });
-
-    window.addEventListener("click", (e) => {
-        if (e.target == modal) {
-            modal.style.display = "none";
-        }
-    });
-
     updateCalendar();
 });
-
-
 </script>
 
 </body>

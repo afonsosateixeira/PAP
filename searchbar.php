@@ -48,17 +48,19 @@
     }
     
     .filter-dropdown {
-        display: none;
-        position: absolute;
-        top: 50px;
-        right: 0;
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        width: 100%;
-    }
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    z-index: 9999;  /* Garante que o dropdown fique acima dos outros elementos */
+}
+
     
     .filter-dropdown select {
         width: calc(100% - 110px);
@@ -88,37 +90,38 @@
     <script>
         // Carregar categorias dinamicamente via PHP
         document.addEventListener('DOMContentLoaded', function() {
-    fetch('category.php?action=get_categories') // Requisição para obter as categorias
-        .then(response => response.json())
-        .then(data => {
-            const categorySelect = document.getElementById('category-filter');
-            
-            // Garante que a lista está limpa antes de adicionar as opções
-            categorySelect.innerHTML = "";
+            fetch('category.php?action=get_categories')  // Requisição para obter as categorias
+    .then(response => response.json())
+    .then(data => {
+        const categorySelect = document.getElementById('category-filter');
+        
+        // Garante que a lista está limpa antes de adicionar as opções
+        categorySelect.innerHTML = "";
 
-            // Adiciona a opção "Todas as Categorias"
-            const allCategoriesOption = document.createElement('option');
-            allCategoriesOption.value = ""; // Valor vazio para representar todas
-            allCategoriesOption.textContent = "Todas as Categorias";
-            categorySelect.appendChild(allCategoriesOption);
+        // Adiciona a opção "Todas as Categorias"
+        const allCategoriesOption = document.createElement('option');
+        allCategoriesOption.value = ""; // Valor vazio para representar todas
+        allCategoriesOption.textContent = "Todas as Categorias";
+        categorySelect.appendChild(allCategoriesOption);
 
-            // Adiciona "Sem Categoria" apenas uma vez
-            const noCategoryOption = document.createElement('option');
-            noCategoryOption.value = "0"; // Valor 0 para representar "Sem Categoria"
-            noCategoryOption.textContent = "Sem Categoria";
-            categorySelect.appendChild(noCategoryOption);
+        // Adiciona "Sem Categoria" apenas uma vez
+        const noCategoryOption = document.createElement('option');
+        noCategoryOption.value = "0"; // Valor 0 para representar "Sem Categoria"
+        noCategoryOption.textContent = "Sem Categoria";
+        categorySelect.appendChild(noCategoryOption);
 
-            // Adiciona as categorias do banco de dados (excluindo "Sem Categoria" caso já exista)
-            data.categories.forEach(category => {
-                if (category.name.toLowerCase() !== "sem categoria") { // Evita duplicação
-                    const option = document.createElement('option');
-                    option.value = category.id;
-                    option.textContent = category.name;
-                    categorySelect.appendChild(option);
-                }
-            });
-        })
-        .catch(error => console.error('Erro ao carregar categorias:', error));
+        // Adiciona as categorias do banco de dados (excluindo "Sem Categoria" caso já exista)
+        data.categories.forEach(category => {
+            if (category.name.toLowerCase() !== "sem categoria") {  // Evita duplicação
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            }
+        });
+    })
+    .catch(error => console.error('Erro ao carregar categorias:', error));
+
 });
 
 
@@ -154,18 +157,15 @@
         function filterNotes() {
     let filterText = document.getElementById('search-input').value.toLowerCase();
     let filterCategory = document.getElementById('category-filter').value;
-    let notes = document.querySelectorAll('.note-card');  // Seleciona todas as notas
+    let notes = document.querySelectorAll('.col-md-4');  // Seleciona todas as notas, que estão dentro de div com class col-md-4
     
     notes.forEach(note => {
-        let title = note.querySelector('h3').textContent.toLowerCase();
+        let title = note.querySelector('.card-title').textContent.toLowerCase();  // Pega o título da nota
         let category = note.getAttribute('data-category');  // Obtém o ID da categoria da nota
-
-        // Considera "Sem Categoria" como categoria 0 ou vazia
-        let isNoCategory = (category === "0" || category === "");
 
         // Verifica se o título contém o texto de pesquisa e se a categoria corresponde
         if ((title.includes(filterText)) && 
-            (filterCategory === '' || category === filterCategory || (filterCategory === "0" && isNoCategory))) {
+            (filterCategory === '' || category === filterCategory)) {
             note.style.display = '';  // Exibe a nota
         } else {
             note.style.display = 'none';  // Oculta a nota
@@ -173,7 +173,7 @@
     });
 }
 
-// Filtrando tarefas com base na categoria e no texto da pesquisa
+
 document.getElementById('search-input').addEventListener('input', function () {
     filterTasks();  // Chama a função de filtro sempre que o input mudar
 });
@@ -189,17 +189,18 @@ function filterTasks() {
     
     tasks.forEach(task => {
         let title = task.querySelector('.task-title').textContent.toLowerCase();
-        let category = task.querySelector('.task-category').textContent.toLowerCase();  // Supondo que a categoria esteja nesta classe
-        
+        let category = task.getAttribute('data-category');  // Obtém o ID da categoria da tarefa
+
         // Verifica se o título contém o texto de pesquisa e se a categoria corresponde
         if ((title.includes(filterText)) && 
-            (filterCategory === '' || category.includes(filterCategory.toLowerCase()))) {
+            (filterCategory === '' || category === filterCategory)) {
             task.style.display = '';  // Exibe a tarefa
         } else {
             task.style.display = 'none';  // Oculta a tarefa
         }
     });
 }
+
 
 
     </script>

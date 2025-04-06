@@ -235,7 +235,6 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
           <form method="POST">
             <div class="modal-header">
               <h5 class="modal-title" id="alarmModalLabel">Adicionar/Editar Alarme</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <input type="hidden" name="alarm_id" id="alarm_id" value="">
@@ -273,14 +272,13 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary" name="save_alarm">Guardar</button>
+              <button type="submit" class="btn btn-success" name="save_alarm">Salvar</button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- Script para gerenciamento dos alarmes -->
     <script>
         // Funções para checar e notificar alarmes
         let alarmsData = {};

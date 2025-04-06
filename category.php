@@ -100,145 +100,94 @@ $categories = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <title>Categorias</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Modal customizado (posição fixa) */
-        #category-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-            width: 300px;
-            border-radius: 5px;
-            z-index: 9999;
-        }
-
-        /* Inputs lado a lado no modal */
-        .category-inputs {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        #category-name {
-            flex-grow: 1;
-            padding: 5px;
-        }
-        #category-color {
-            width: 50px;
-            height: 35px;
-            border: none;
-        }
-
-        /* Botão para expandir/recolher lista de categorias */
-        #toggle-categories {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
-            margin: 20px 0;
-        }
-
-        /* Lista de Categorias */
-        #categories-list {
-            display: none;
-            padding: 10px;
-        }
         .category-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            padding: 5px;
-            border-radius: 3px;
-            box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
+    background-color: #ffffff;
+    color: #000000;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin: 10px;
+}
 
-        .category-actions {
-            display: flex;
-            gap: 10px;
-        }
+.category-item .d-flex {
+    justify-content: space-between;
+    align-items: center;
+}
 
-        /* Botões quadrados (edit/delete) com ícone */
-        .edit-category,
-        .delete-category {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background-color: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid;
-            cursor: pointer;
-        }
-        .edit-category {
-            border-color: #FFD700;
-            color: #FFD700;
-        }
-        .edit-category:hover {
-            background-color: #FFD700;
-            color: #000;
-        }
-        .delete-category {
-            border-color: #FF0000;
-            color: #FF0000;
-        }
-        .delete-category:hover {
-            background-color: #FF0000;
-            color: #fff;
-        }
+.category-item .edit-category, 
+.category-item .delete-category {
+    background: none;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
     </style>
 </head>
 <body>
-<!-- Botão "Criar Categoria" usando classes do Bootstrap -->
-<button id="create-category" class="btn btn-success mb-3">Criar Categoria</button>
 
-<!-- Modal customizado -->
-<div id="category-modal">
-    <input type="hidden" id="category-id">
-    <div class="category-inputs">
-        <input type="text" id="category-name" class="form-control" placeholder="Nome da Categoria" required>
-        <input type="color" id="category-color" required>
+<button id="create-category" class="btn btn-success mb-3"><i class="fa fa-plus"></i> Criar categoria </button>
+
+<!-- Modal do Bootstrap -->
+<div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">Criar/Editar Categoria</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="category-id">
+                <div class="mb-3">
+                    <label for="category-name" class="form-label">Nome da Categoria</label>
+                    <input type="text" id="category-name" class="form-control" placeholder="Nome da Categoria" required>
+                </div>
+                <div class="mb-3">
+                    <label for="category-color" class="form-label">Cor</label>
+                    <input type="color" id="category-color" class="form-control" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="save-category" class="btn btn-success">Salvar</button>
+                
+            </div>
+        </div>
     </div>
-    <!-- Botões Salvar/Cancelar usando Bootstrap -->
-    <button type="button" id="save-category" class="btn btn-success w-100"> Salvar</button>
-    <button type="button" id="cancel-category" class="btn btn-danger w-100 mt-2">Cancelar</button>
 </div>
 
 <!-- Botão para mostrar/ocultar a lista de categorias -->
-<div id="toggle-categories">
-    <span>&#9660;</span>
+<div id="toggle-categories" class="cursor-pointer">
+    <span id="toggle-icon">&#9660;</span>
     <strong>Lista de Categorias</strong>
 </div>
 
 <!-- Lista de Categorias -->
-<div id="categories-list">
+<div id="categories-list" style="display: none;">
     <?php foreach ($categories as $category): ?>
-        <div class="category-item">
-            <span style="color: <?= htmlspecialchars($category['color'], ENT_QUOTES) ?>;">
-                <?= htmlspecialchars($category['name'], ENT_QUOTES) ?>
-            </span>
-            <div class="category-actions">
-                <!-- Botão Editar -->
-                <button class="edit-category"
-                    onclick="editCategory(
+        <div class="category-item" style="background-color: #ffffff; color: #000000; width: 250px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); padding: 10px; margin: 10px;">
+            <div class="d-flex justify-content-between align-items-center">
+                <span style="color: <?= htmlspecialchars($category['color'], ENT_QUOTES) ?>;">
+                    <?= htmlspecialchars($category['name'], ENT_QUOTES) ?>
+                </span>
+                <div>
+                    <!-- Botão Editar -->
+                    <button class="edit-category btn btn-link" onclick="editCategory(
                         <?= $category['id'] ?>, 
                         '<?= htmlspecialchars($category['name'], ENT_QUOTES) ?>', 
                         '<?= $category['color'] ?>'
                     )">
-                    <i class="bi bi-pencil-fill"></i>
-                </button>
-                <!-- Botão Excluir -->
-                <button class="delete-category" 
-                    onclick="deleteCategory(<?= $category['id'] ?>)">
-                    <i class="bi bi-trash-fill"></i>
-                </button>
+                        <i class="fa fa-pen"></i>
+                    </button>
+                    <!-- Botão Excluir -->
+                    <button class="delete-category btn btn-link" onclick="deleteCategory(<?= $category['id'] ?>)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
             </div>
         </div>
     <?php endforeach; ?>
@@ -247,23 +196,11 @@ $categories = $stmt->fetchAll();
 <script>
     // Botão para abrir modal de criação
     document.getElementById('create-category').addEventListener('click', function() {
-        document.getElementById('category-modal').style.display = 'block';
+        const modal = new bootstrap.Modal(document.getElementById('category-modal'));
+        modal.show();
         document.getElementById('category-id').value = '';
         document.getElementById('category-name').value = '';
         document.getElementById('category-color').value = '#ffffff';
-    });
-
-    // Botão para cancelar modal
-    document.getElementById('cancel-category').addEventListener('click', function() {
-        document.getElementById('category-modal').style.display = 'none';
-    });
-
-    // Toggle exibir/ocultar lista de categorias
-    document.getElementById('toggle-categories').addEventListener('click', function() {
-        const list = document.getElementById('categories-list');
-        list.style.display = (list.style.display === '' || list.style.display === 'none') 
-            ? 'block' 
-            : 'none';
     });
 
     // Salvar ou editar categoria
@@ -306,7 +243,8 @@ $categories = $stmt->fetchAll();
 
     // Função para editar categoria
     function editCategory(id, name, color) {
-        document.getElementById('category-modal').style.display = 'block';
+        const modal = new bootstrap.Modal(document.getElementById('category-modal'));
+        modal.show();
         document.getElementById('category-id').value = id;
         document.getElementById('category-name').value = name;
         document.getElementById('category-color').value = color;
@@ -327,6 +265,20 @@ $categories = $stmt->fetchAll();
             .catch(error => console.error('Erro:', error));
         }
     }
+    // Função para alternar a visibilidade da lista de categorias
+document.getElementById('toggle-categories').addEventListener('click', function() {
+    const categoriesList = document.getElementById('categories-list');
+    const toggleIcon = document.getElementById('toggle-icon');
+    
+    if (categoriesList.style.display === 'none' || categoriesList.style.display === '') {
+        categoriesList.style.display = 'block';
+        toggleIcon.innerHTML = '&#9650;';  // Ícone de seta para cima
+    } else {
+        categoriesList.style.display = 'none';
+        toggleIcon.innerHTML = '&#9660;';  // Ícone de seta para baixo
+    }
+});
+
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

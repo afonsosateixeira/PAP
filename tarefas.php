@@ -45,22 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         header('Location: tarefas.php');
     } else {
-// Inserir nova tarefa
-$status = 0;
-$sql = "INSERT INTO tbtarefas (tituloTarefa, descricaoTarefa, dataconclusao_date, datalembrete_date, recorrenciaTarefa, statusTarefa, category_id, user_id) 
-        VALUES (:titulo, :descricao, :dataConclusao, :dataLembrete, :recorrencia, :status, :category_id, :user_id)";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([
-    ':titulo' => $titulo,
-    ':descricao' => $descricao,
-    ':dataConclusao' => $dataConclusao,
-    ':dataLembrete' => $dataLembrete,
-    ':recorrencia' => $recorrencia,
-    ':status' => $status,
-    ':category_id' => $category_id,
-    ':user_id' => $user_id  // Garantir que o user_id seja passado
-]);
-
+        // Inserir nova tarefa
+        $status = 0;
+        $sql = "INSERT INTO tbtarefas (tituloTarefa, descricaoTarefa, dataconclusao_date, datalembrete_date, recorrenciaTarefa, statusTarefa, category_id, user_id) 
+                VALUES (:titulo, :descricao, :dataConclusao, :dataLembrete, :recorrencia, :status, :category_id, :user_id)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':titulo' => $titulo,
+            ':descricao' => $descricao,
+            ':dataConclusao' => $dataConclusao,
+            ':dataLembrete' => $dataLembrete,
+            ':recorrencia' => $recorrencia,
+            ':status' => $status,
+            ':category_id' => $category_id,
+            ':user_id' => $user_id  // Garantir que o user_id seja passado
+        ]);
     }
 }
 
@@ -80,11 +79,28 @@ if (isset($_GET['status'])) {
     $stmt->execute([':id' => $id]);
 }
 
-// Obter tarefas associadas ao usuário logado
+// Verificar tarefas vencidas e pendentes
+$currentDate = new DateTime();
+$stmt = $pdo->prepare("SELECT * FROM tbtarefas WHERE user_id = :user_id AND statusTarefa = 0");
+$stmt->execute([':user_id' => $user_id]);
+$pendingTasks = $stmt->fetchAll();
+
+$expiredTasks = [];
+
+foreach ($pendingTasks as $task) {
+    $conclusionDate = new DateTime($task['dataconclusao_date']);
+    $interval = $currentDate->diff($conclusionDate);
+    
+    if ($interval->days > 0 && $currentDate > $conclusionDate) {
+        // Adicionar tarefas vencidas a um array para alertar o usuário
+        $expiredTasks[] = $task['tituloTarefa'];
+    }
+}
+
+// Exibir tarefas associadas ao usuário logado
 $stmt = $pdo->prepare("SELECT * FROM tbtarefas WHERE user_id = :user_id");
 $stmt->execute([':user_id' => $user_id]);
 $tasks = $stmt->fetchAll();
-
 
 // Editar tarefa
 if (isset($_GET['edit'])) {
@@ -99,46 +115,20 @@ if (isset($_GET['edit'])) {
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Tarefas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.10/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.10/dist/sweetalert2.min.js"></script>
     <style>
-            #main-content {
+        #main-content {
             flex-grow: 1;
             margin-left: 82px;
             padding: 20px;
             width: calc(100% - 82px);
         }
-        .task-form {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px; 
-            border-radius: 8px;
-            width: 400px;
-            max-width: 100%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-        .task-form input, .task-form textarea, .task-form select {
-            width: 90%; 
-            margin: 10px auto; 
-            display: block; 
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-            transition: border 0.3s ease;
-        }
-
-        .task-form input:focus, .task-form textarea:focus, .task-form select:focus {
-            border-color: #2ecc71;
-            outline: none;
-        }
-
-        .task-form textarea {
-            height: 120px;
+        .modal-header {
+            border-bottom: 1px solid #ddd;
         }
         .buttons-container {
             display: flex;
@@ -148,55 +138,50 @@ if (isset($_GET['edit'])) {
     </style>
 </head>
 <body>
-<?php include 'sidebar.php'; ?>
+    <?php include 'sidebar.php'; ?>
+
     <div class="container" id="main-content">
         <h1 class="mb-4">Gestor de Tarefas</h1>
         <div class="buttons-container">
-        <button id="create-note" class="btn btn-success mb-4">Criar Tarefa</button>
-        <?php include 'searchbar.php'; ?>
-    </div>
-        <!-- Formulário para adicionar ou editar tarefas -->
-        <div class="task-form" id="task-form">
-            <h3 id="form-title"><?php echo isset($task) ? 'Editar Tarefa' : 'Adicionar Tarefa'; ?></h3>
-            <form method="post" id="task-form-content">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="titulo" name="tituloTarefa" placeholder="Título" required value="<?php echo isset($task) ? $task['tituloTarefa'] : ''; ?>">
+            <button class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#taskModal" onclick="openTaskModal()"><i class="fa fa-plus"></i> Criar Tarefa
+            </button>
+            <?php include 'searchbar.php'; ?>
+        </div>
+
+        <!-- Modal para criar/editar tarefa -->
+        <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="taskModalLabel">Adicionar Tarefa</h5>
+                    </div>
+                    <form method="POST" id="task-form-content">
+                        <div class="modal-body">
+                            <input type="text" class="form-control mb-3" name="tituloTarefa" id="titulo" placeholder="Título" required>
+                            <textarea class="form-control mb-3" name="descricaoTarefa" id="descricao" placeholder="Descrição" required></textarea>
+                            <input type="datetime-local" class="form-control mb-3" name="dataHoraConclusaoTarefa" id="dataHoraConclusao" required>
+                            <input type="datetime-local" class="form-control mb-3" name="dataHoraLembreteTarefa" id="dataHoraLembrete" placeholder="Data e Hora de Lembrete">
+                            <select class="form-select mb-3" name="recorrenciaTarefa" id="recorrencia">
+                                <option value="0">Nenhuma</option>
+                                <option value="1">Diária</option>
+                                <option value="2">Semanal</option>
+                                <option value="3">Mensal</option>
+                            </select>
+                            <select class="form-select mb-3" name="categoriaTarefa" id="categoria" required>
+                                <option value="">Selecionar Categoria</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= $category['id'] ?>"><?= $category['name'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Salvar</button>
+                        </div>
+                        <input type="hidden" name="task_id" id="task_id">
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <textarea class="form-control" id="descricao" name="descricaoTarefa" placeholder="Conteúdo" required><?php echo isset($task) ? $task['descricaoTarefa'] : ''; ?></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="categoria" class="form-label">Categoria</label>
-                    <select class="form-control" id="categoria" name="categoriaTarefa" required>
-                        <option value="">Selecione a Categoria</option>
-                        <?php foreach ($categories as $category): ?>
-                            <option value="<?= $category['id'] ?>" <?= (isset($task) && $task['category_id'] == $category['id']) ? 'selected' : ''; ?>>
-                                <?= $category['name'] ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="dataHoraConclusao" class="form-label">Data e Hora de Conclusão</label>
-                    <input type="datetime-local" class="form-control" id="dataHoraConclusao" name="dataHoraConclusaoTarefa" required value="<?php echo isset($task) ? date('Y-m-d\TH:i', strtotime($task['dataconclusao_date'])) : ''; ?>">
-                </div>
-                <div class="mb-3">
-                    <label for="dataHoraLembrete" class="form-label">Data e Hora do Lembrete (Opcional)</label>
-                    <input type="datetime-local" class="form-control" id="dataHoraLembrete" name="dataHoraLembreteTarefa" value="<?php echo isset($task) ? date('Y-m-d\TH:i', strtotime($task['datalembrete_date'])) : ''; ?>">
-                </div>
-                <div class="mb-3">
-                    <label for="recorrencia" class="form-label">Recorrência</label>
-                    <select class="form-control" id="recorrencia" name="recorrenciaTarefa">
-                        <option value="0" <?php echo (isset($task) && $task['recorrenciaTarefa'] == 0) ? 'selected' : ''; ?>>Nenhuma</option>
-                        <option value="1" <?php echo (isset($task) && $task['recorrenciaTarefa'] == 1) ? 'selected' : ''; ?>>Diário</option>
-                        <option value="2" <?php echo (isset($task) && $task['recorrenciaTarefa'] == 2) ? 'selected' : ''; ?>>Semanal</option>
-                        <option value="3" <?php echo (isset($task) && $task['recorrenciaTarefa'] == 3) ? 'selected' : ''; ?>>Mensal</option>
-                        <option value="4" <?php echo (isset($task) && $task['recorrenciaTarefa'] == 4) ? 'selected' : ''; ?>>Anual</option>
-                    </select>
-                </div>
-                <button type="submit" id="save-note" class="btn btn-success w-100">Salvar</button>
-                <button type="button" id="cancel" class="btn btn-danger w-100 mt-3">Cancelar</button>
-            </form>
+            </div>
         </div>
 
         <!-- Exibição das tarefas -->
@@ -211,103 +196,139 @@ if (isset($_GET['edit'])) {
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody>
-    <?php foreach ($tasks as $task): ?>
-        <tr class="task-row">
-            <td><?= $task['statusTarefa'] ? 'Concluída' : 'Pendente' ?></td>
-            <td class="task-title"><?= $task['tituloTarefa'] ?></td>
-            <td><?= $task['descricaoTarefa'] ?></td>
-            <td class="task-category">
-                <?php
-                // Verifique se a categoria existe antes de tentar buscar o nome
-                if ($task['category_id']) {
-                    // Prepare a consulta
-                    $stmt = $pdo->prepare("SELECT name FROM categories WHERE id = :id");
-                    $stmt->execute([':id' => $task['category_id']]);
-                    $categoryName = $stmt->fetchColumn();
-                    
-                    // Se a consulta falhou (fetchColumn retornou false), use 'Nenhuma'
-                    if (!$categoryName) {
-                        $categoryName = 'Nenhuma';
-                    }
-                } else {
-                    $categoryName = 'Nenhuma';
-                }
-                echo $categoryName;
-                ?>
-            </td>
-            <td><?= $task['dataconclusao_date'] ? date('d/m/Y H:i', strtotime($task['dataconclusao_date'])) : '-' ?></td>
-            <td>
-                <?php if (!$task['statusTarefa']): ?>
-                    <a href="?status=<?= $task['idTarefa'] ?>" class="btn btn-success btn-sm">Concluir</a>
-                <?php endif; ?>
-                <a href="#" onclick="editTask(<?= $task['idTarefa'] ?>, '<?= addslashes($task['tituloTarefa']) ?>', '<?= addslashes($task['descricaoTarefa']) ?>', '<?= $task['dataconclusao_date'] ?>', '<?= $task['datalembrete_date'] ?>', '<?= $task['recorrenciaTarefa'] ?>', '<?= $task['category_id'] ?>')" class="btn btn-warning btn-sm">Editar</a>
-                <a href="?delete=<?= $task['idTarefa'] ?>" class="btn btn-danger btn-sm">Excluir</a>
-            </td>
-        </tr>
-    <?php endforeach; ?>
-</tbody>
-
+            <tbody id="task-table-body">
+                <?php foreach ($tasks as $task): ?>
+                    <tr class="task-row" data-category="<?= $task['category_id'] ?>">
+                        <td><?= $task['statusTarefa'] ? 'Concluída' : 'Pendente' ?></td>
+                        <td class="task-title"><?= $task['tituloTarefa'] ?></td>
+                        <td><?= $task['descricaoTarefa'] ?></td>
+                        <td class="task-category">
+                            <?php
+                                if ($task['category_id']) {
+                                    $stmt = $pdo->prepare("SELECT name FROM categories WHERE id = :id");
+                                    $stmt->execute([':id' => $task['category_id']]);
+                                    $categoryName = $stmt->fetchColumn();
+                                    echo $categoryName ?? 'Nenhuma';
+                                } else {
+                                    echo 'Nenhuma';
+                                }
+                            ?>
+                        </td>
+                        <td><?= $task['dataconclusao_date'] ? date('d/m/Y H:i', strtotime($task['dataconclusao_date'])) : '-' ?></td>
+                        <td>
+                            <?php if (!$task['statusTarefa']): ?>
+                                <a href="?status=<?= $task['idTarefa'] ?>" class="btn btn-success btn-sm">Concluir</a>
+                            <?php endif; ?>
+                            <button class="btn btn-warning btn-sm" onclick="editTask(<?= $task['idTarefa'] ?>, '<?= addslashes($task['tituloTarefa']) ?>', '<?= addslashes($task['descricaoTarefa']) ?>', '<?= $task['dataconclusao_date'] ?>', '<?= $task['datalembrete_date'] ?>', '<?= $task['recorrenciaTarefa'] ?>', '<?= $task['category_id'] ?>')">Editar</button>
+                            <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $task['idTarefa'] ?>)">Excluir</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
         </table>
-
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-// Aguardar o carregamento completo do DOM antes de adicionar os event listeners
-document.addEventListener("DOMContentLoaded", function() {
+        function openTaskModal() {
+            // Limpar o formulário ao abrir o modal para criação
+            document.getElementById('task-form-content').reset();
+            document.getElementById('taskModalLabel').textContent = 'Adicionar Tarefa';
+            document.getElementById('task_id').value = ''; 
+        }
 
-    // Mostrar o formulário de criação de tarefa
-    document.getElementById('create-note').addEventListener('click', function() {
-        // Resetar o formulário
-        document.getElementById('task-form').style.display = 'block';
-        document.getElementById('task-form-content').reset();
-        document.getElementById('form-title').textContent = 'Adicionar Tarefa';
+        function editTask(id, titulo, descricao, dataConclusao, dataLembrete, recorrencia, categoryId) {
+            // Preencher os campos do formulário com os dados da tarefa
+            document.getElementById('taskModalLabel').textContent = 'Editar Tarefa';
+            document.getElementById('titulo').value = titulo;
+            document.getElementById('descricao').value = descricao;
+            document.getElementById('dataHoraConclusao').value = dataConclusao;
+            document.getElementById('dataHoraLembrete').value = dataLembrete;
+            document.getElementById('recorrencia').value = recorrencia;
+            document.getElementById('categoria').value = categoryId;
+            document.getElementById('task_id').value = id;
+
+            // Abrir o modal
+            var myModal = new bootstrap.Modal(document.getElementById('taskModal'));
+            myModal.show();
+        }
+
+        function confirmDelete(taskId) {
+            // Exibe o pop-up de confirmação
+            if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
+                // Se o usuário confirmar, redireciona para a URL de exclusão
+                window.location.href = "?delete=" + taskId;
+            }
+        }
+
+        // Validação de tarefas vencidas
+        document.addEventListener('DOMContentLoaded', function() {
+    const tasks = <?= json_encode($tasks); ?>;  // Array de tarefas vindo do PHP
+    const currentDate = new Date();
+
+    tasks.forEach(task => {
+        const taskConclusionDate = new Date(task.dataconclusao_date);
         
-        // Garantir que o campo 'task_id' não exista ao criar uma nova tarefa
-        const existingIdField = document.querySelector('input[name="task_id"]');
-        if (existingIdField) {
-            existingIdField.remove();  // Remove o campo oculto de edição, caso exista
+        // Ajustar as horas, minutos e segundos para comparar apenas a data
+        taskConclusionDate.setHours(0, 0, 0, 0);
+        currentDate.setHours(0, 0, 0, 0);
+
+        // Verificar se a tarefa está vencida
+        if (taskConclusionDate < currentDate && task.statusTarefa == 0) {
+            // Verificar se o alerta já foi desativado para esta tarefa
+            if (!localStorage.getItem('alertDismissed_' + task.idTarefa)) {
+                // Exibir um alerta quando a tarefa estiver vencida e ainda não for concluída
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tarefa não concluída!',
+                    html: `
+                        <p>A tarefa "${task.tituloTarefa}" não foi concluída no prazo.</p>
+                        <label>
+                            <input type="checkbox" id="dontShowAgain_${task.idTarefa}" />
+                            Não mostrar mais esta mensagem 
+                        </label>
+                    `,
+                    confirmButtonText: 'OK',
+                    preConfirm: () => {
+                        // Se o checkbox estiver marcado, salvar no localStorage
+                        const dontShowAgain = document.getElementById('dontShowAgain_' + task.idTarefa).checked;
+                        if (dontShowAgain) {
+                            localStorage.setItem('alertDismissed_' + task.idTarefa, 'true');
+                        }
+                    }
+                });
+            }
         }
-    });
 
-    // Função para preencher o formulário de edição
-    window.editTask = function(id, titulo, descricao, dataConclusao, dataLembrete, recorrencia, categoryId) {
-        document.getElementById('task-form').style.display = 'block';
-        document.getElementById('form-title').textContent = 'Editar Tarefa';
-
-        document.getElementById('titulo').value = titulo;
-        document.getElementById('descricao').value = descricao;
-        document.getElementById('dataHoraConclusao').value = dataConclusao;
-        document.getElementById('dataHoraLembrete').value = dataLembrete;
-        document.getElementById('recorrencia').value = recorrencia;
-        document.getElementById('categoria').value = categoryId;
-
-        // Remover o campo 'hidden' existente (caso haja)
-        const existingIdField = document.querySelector('input[name="task_id"]');
-        if (existingIdField) {
-            existingIdField.remove();
+        // Verificar se a tarefa está a 1 dia do prazo (sem contar com as horas)
+        const oneDayBefore = new Date(taskConclusionDate);
+        oneDayBefore.setDate(oneDayBefore.getDate() - 1); // Subtrai 1 dia
+        
+        if (currentDate.toDateString() === oneDayBefore.toDateString() && task.statusTarefa == 0) {
+            // Exibir um alerta avisando que a tarefa está quase no prazo
+            Swal.fire({
+                icon: 'info',
+                title: 'O prazo está quase a acabar!',
+                html: `
+                    <p>A tarefa "${task.tituloTarefa}" está prestes a acabar amanhã!</p>
+                    <label>
+                        <input type="checkbox" id="dontShowAgainReminder_${task.idTarefa}" />
+                        Não mostrar mais esta mensagem 
+                    </label>
+                `,
+                confirmButtonText: 'OK',
+                preConfirm: () => {
+                    // Se o checkbox estiver marcado, salvar no localStorage
+                    const dontShowAgainReminder = document.getElementById('dontShowAgainReminder_' + task.idTarefa).checked;
+                    if (dontShowAgainReminder) {
+                        localStorage.setItem('alertDismissedReminder_' + task.idTarefa, 'true');
+                    }
+                }
+            });
         }
-
-        // Adicionar o id da tarefa como campo oculto
-        let inputId = document.createElement('input');
-        inputId.type = 'hidden';
-        inputId.name = 'task_id';
-        inputId.value = id;
-        document.getElementById('task-form-content').appendChild(inputId);
-    }
-
-    // Fechar o formulário
-    document.getElementById('cancel').addEventListener('click', function() {
-        document.getElementById('task-form').style.display = 'none';
-    });
-
-    // Verificar se o botão de salvar está funcionando
-    document.getElementById('save-note').addEventListener('click', function() {
-        // Submete o formulário manualmente
-        document.getElementById('task-form-content').submit();
     });
 });
-</script>
 
+    </script>
 </body>
 </html>

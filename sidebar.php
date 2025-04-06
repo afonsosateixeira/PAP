@@ -39,22 +39,32 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
             font-family: 'Poppins', sans-serif;
         }
 
-        body {
-            display: flex;
-            min-height: 100vh;
-        }
-
         #sidebar {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             background-color: #b5dfff;
             height: 100vh;
+            position: fixed; /* Fixar a sidebar */
+            top: 0; /* Garantir que a sidebar esteja no topo da página */
+            left: 0;
             border-radius: 0px 18px 18px 0px;
-            position: relative;
             transition: all .5s;
             min-width: 82px;
             z-index: 2;
+        }
+
+        #open_btn {
+            position: absolute;
+            top: 30px;
+            right: -10px;
+            background-color: #71b9f0;
+            color: #e3e9f7;
+            border-radius: 100%;
+            width: 20px;
+            height: 20px;
+            border: none;
+            cursor: pointer;
         }
 
         #sidebar_content {
@@ -329,16 +339,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const sidebar = document.getElementById('sidebar');
     const openBtnIcon = document.getElementById('open_btn_icon');
     const sidebarState = localStorage.getItem('sidebarState');
+    const body = document.body;  // Referência ao body
 
     // Se o estado estiver no localStorage, aplicamos
     if (sidebarState === 'minimized') {
         sidebar.classList.remove('open-sidebar');  // Sidebar minimizada
         openBtnIcon.classList.remove('fa-chevron-left');
         openBtnIcon.classList.add('fa-chevron-right');
+        body.style.paddingLeft = "82px";  // Ajuste quando a sidebar estiver minimizada
     } else {
         sidebar.classList.add('open-sidebar');  // Sidebar maximizada
         openBtnIcon.classList.remove('fa-chevron-right');
         openBtnIcon.classList.add('fa-chevron-left');
+        body.style.paddingLeft = "250px";  // Aumente o valor aqui para mais espaçamento
     }
 
     // Adicionar funcionalidade de minimizar/maximizar ao botão
@@ -349,8 +362,10 @@ document.addEventListener("DOMContentLoaded", function() {
         // Salvar o estado no localStorage
         if (isOpen) {
             localStorage.setItem('sidebarState', 'maximized'); // Sidebar maximizada
+            body.style.paddingLeft = "250px";  // Aumente o valor aqui para mais espaçamento
         } else {
             localStorage.setItem('sidebarState', 'minimized'); // Sidebar minimizada
+            body.style.paddingLeft = "82px";  // Ajuste quando a sidebar estiver minimizada
         }
 
         // Alternar o ícone do botão para mostrar a ação de expandir ou retrair
@@ -372,7 +387,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
-
 </script>
 
 </body>

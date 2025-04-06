@@ -83,3 +83,4 @@ CREATE TABLE reposicao_horas (
     status ENUM('pendente', 'concluido') NOT NULL DEFAULT 'pendente',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
