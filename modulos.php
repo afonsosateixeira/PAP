@@ -210,7 +210,8 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                     <td><?= $reposicao['datahora_reposicao'] ?></td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick='preencherFormulario(<?= json_encode($reposicao) ?>)'>Editar</button>
-                        <a href="?action=delete&id=<?= $reposicao['id'] ?>" class="btn btn-danger btn-sm">Excluir</a>
+                        <button class="btn btn-danger btn-sm" onclick="confirmarExclusao(<?= $reposicao['id'] ?>)">Excluir</button>
+
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -247,7 +248,7 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
                     <td><?= $reposicao['datahora_reposicao'] ?></td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick='preencherFormulario(<?= json_encode($reposicao) ?>)'>Editar</button>
-                        <a href="?action=delete&id=<?= $reposicao['id'] ?>" class="btn btn-danger btn-sm">Excluir</a>
+                        <button class="btn btn-danger btn-sm" onclick="confirmarExclusao(<?= $reposicao['id'] ?>)">Excluir</button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -302,7 +303,78 @@ $reposicoes_modulos = $stmtModulos->fetchAll();
         };
         xhr.send();
     }
+    document.addEventListener("DOMContentLoaded", function() {
+    const formHoras = document.getElementById("form-horas");
+    const formModulos = document.getElementById("form-modulos");
+
+    formHoras.addEventListener("submit", function(e) {
+        const dataInput = document.getElementById("datahora_reposicao-horas").value;
+        if (!validarDataFutura(dataInput)) {
+            e.preventDefault();
+            Swal.fire('Erro', 'A data selecionada não pode estar no passado.', 'error');
+        }
+    });
+
+    formModulos.addEventListener("submit", function(e) {
+        const dataInput = document.getElementById("datahora_reposicao-modulos").value;
+        if (!validarDataFutura(dataInput)) {
+            e.preventDefault();
+            Swal.fire('Erro', 'A data/hora da reposição não pode estar no passado.', 'error');
+        }
+    });
+
+    function validarDataFutura(dataStr) {
+        const dataSelecionada = new Date(dataStr);
+        const agora = new Date();
+        return dataSelecionada > agora;
+    }
+});
+
+function confirmarExclusao(id) {
+    Swal.fire({
+        title: 'Tem certeza?',
+        text: "Esta ação não pode ser desfeita!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '?action=delete&id=' + id;
+        }
+    });
+}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Verificar se alguma reposição está para ocorrer em menos de 1 dia
+    const linhas = document.querySelectorAll("table tbody tr");
+    const agora = new Date();
+
+    linhas.forEach(linha => {
+        const celulaDataHora = linha.querySelector("td:nth-last-child(2)");
+        if (celulaDataHora) {
+            const dataTexto = celulaDataHora.textContent.trim();
+            const dataReposicao = new Date(dataTexto);
+
+            const diffHoras = (dataReposicao - agora) / (1000 * 60 * 60);
+
+            if (diffHoras > 0 && diffHoras <= 24) {
+                Swal.fire({
+                    title: 'Atenção!',
+                    text: 'Falta menos de 1 dia para uma reposição!',
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    });
+});
+
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>
 </html>

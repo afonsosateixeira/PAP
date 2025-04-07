@@ -89,6 +89,9 @@ $categories = $stmt->fetchAll();
             align-items: center;
             gap: 10px;
         }
+        .form-label {
+            font-weight: bold;
+        }
 
         .note-content {
             font-size: 14px;
@@ -127,10 +130,12 @@ $categories = $stmt->fetchAll();
                             <input type="hidden" id="note-id" name="note_id">
 
                             <div class="mb-3">
+                                <label for="note-title" class="form-label">Título</label>
                                 <input type="text" id="note-title" name="title" class="form-control" placeholder="Título" required>
                             </div>
 
                             <div class="mb-3">
+                                <label for="note-content" class="form-label">Conteúdo</label>
                                 <textarea id="note-content" name="content" class="form-control" placeholder="Conteúdo" required></textarea>
                             </div>
 
@@ -195,30 +200,42 @@ $categories = $stmt->fetchAll();
 </main>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        <?php if (!empty($upcoming_notes)): ?>
-            if (!localStorage.getItem('dontShowReminder')) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'O prazo está quase a acabar!',
-                    html: `
-                        <p>A nota está prestes a acabar amanhã!</p>
-                        <label>
-                            <input type="checkbox" id="dontShowAgainReminder" />
-                            Não mostrar mais esta mensagem
-                        </label>
-                    `,
-                    showCancelButton: true,
-                    cancelButtonText: 'Fechar',
-                    confirmButtonText: 'Ok',
-                    preConfirm: () => {
-                        if (document.getElementById('dontShowAgainReminder').checked) {
-                            localStorage.setItem('dontShowReminder', 'true');
-                        }
-                    }
-                });
-            }
-        <?php endif; ?>
+    document.addEventListener("DOMContentLoaded", function () {
+        const upcomingNotes = <?= json_encode($upcoming_notes) ?>;
+
+// Filtrar eventos visíveis (ainda não ignorados)
+const visibleNotes = upcomingNotes.filter(note => !localStorage.getItem(`hideReminder_${note.id}`));
+
+if (visibleNotes.length > 0) {
+    let htmlContent = '<p>Você tem evento(s) agendado(s) para amanhã:</p>';
+
+    visibleNotes.forEach(note => {
+        htmlContent += `
+            <div style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                <strong>${note.title}</strong><br>
+                <small>${note.schedule_date}</small><br>
+                <input type="checkbox" id="dont-show-${note.id}">
+                <label for="dont-show-${note.id}">Não mostrar novamente para este evento</label>
+            </div>
+        `;
+    });
+
+    Swal.fire({
+        title: 'Atenção',
+        html: htmlContent,
+        icon: 'info',
+        confirmButtonText: 'OK',
+        preConfirm: () => {
+            visibleNotes.forEach(note => {
+                const checkbox = document.getElementById(`dont-show-${note.id}`);
+                if (checkbox && checkbox.checked) {
+                    localStorage.setItem(`hideReminder_${note.id}`, 'true');
+                }
+            });
+        }
+    });
+}
+
 
         const noteModal = new bootstrap.Modal(document.getElementById('noteModal'));
 

@@ -104,11 +104,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <main>
         <div id="main-content">
-            <div class="container">
                 <h2 class="mb-4">Configurações</h2>
                 <form id="profileForm" action="configuration.php" method="POST" enctype="multipart/form-data">
                     <div class="row">
-                        <div class="col-md-4 profile-pic-container">
+                        <div class="profile-pic-container">
                             <img id="profileImage" src="<?= htmlspecialchars($profilePicture) ?>" alt="Foto de Perfil">
                         </div>
                         <div class="col-md-8">
@@ -126,7 +125,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </form>
             </div>
-        </div>
     </main>
 
     <!-- Modal do Cropper -->

@@ -2,6 +2,8 @@
 session_start();
 require 'config.php';
 
+$alert = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = htmlspecialchars($_POST['name']);
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
@@ -11,24 +13,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->fetch()) {
-        echo "<script>alert('Email já cadastrado!'); window.location.href='register.php';</script>";
-        exit();
-    }
-
-    // Criar hash da senha
-    $hash = password_hash($password, PASSWORD_DEFAULT);
-    
-    // Inserir usuário no banco
-    $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-    if ($stmt->execute([$name, $email, $hash])) {
-        echo "<script>alert('Conta criada com sucesso!'); window.location.href='login.php';</script>";
+        $alert = "email_exists";
     } else {
-        echo "<script>alert('Erro ao criar conta!'); window.location.href='register.php';</script>";
+        // Criar hash da senha
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // Inserir usuário no banco
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+        if ($stmt->execute([$name, $email, $hash])) {
+            $alert = "success";
+        } else {
+            $alert = "error";
+        }
     }
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="pt-pt">
 <head>
@@ -51,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: #e4e4e4;;
+            background: #e4e4e4;
         }
 
         .container {
@@ -157,5 +156,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p class="create-account">Já tem uma conta? <a href="login.php">Entrar</a></p>
         </div>
     </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        <?php if ($alert === "email_exists"): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Email já cadastrado!',
+                text: 'Por favor, utilize outro email.',
+            }).then(() => {
+                window.location.href = 'register.php';
+            });
+        <?php elseif ($alert === "success"): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Conta criada com sucesso!',
+                showConfirmButton: false,
+                timer: 2000
+            }).then(() => {
+                window.location.href = 'login.php';
+            });
+        <?php elseif ($alert === "error"): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro ao criar conta!',
+                text: 'Tente novamente mais tarde.',
+            }).then(() => {
+                window.location.href = 'register.php';
+            });
+        <?php endif; ?>
+    </script>
 </body>
 </html>

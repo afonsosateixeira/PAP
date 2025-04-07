@@ -130,6 +130,10 @@ if (isset($_GET['edit'])) {
         .modal-header {
             border-bottom: 1px solid #ddd;
         }
+        .form-label {
+            font-weight: bold;
+        }
+
         .buttons-container {
             display: flex;
             align-items: center;
@@ -157,16 +161,22 @@ if (isset($_GET['edit'])) {
                     </div>
                     <form method="POST" id="task-form-content">
                         <div class="modal-body">
+                            <label for="tituloTarefa" class="form-label">Título</label>
                             <input type="text" class="form-control mb-3" name="tituloTarefa" id="titulo" placeholder="Título" required>
+                            <label for="descricaoTarefa" class="form-label">Conteúdo</label>
                             <textarea class="form-control mb-3" name="descricaoTarefa" id="descricao" placeholder="Descrição" required></textarea>
+                            <label for="datetime-local" class="form-label">Data e hora de conclusão</label>
                             <input type="datetime-local" class="form-control mb-3" name="dataHoraConclusaoTarefa" id="dataHoraConclusao" required>
-                            <input type="datetime-local" class="form-control mb-3" name="dataHoraLembreteTarefa" id="dataHoraLembrete" placeholder="Data e Hora de Lembrete">
+                            <label for="dataHoraLembreteTarefa"" class="form-label">Data e hora da notificação</label>
+                            <input type="datetime-local" class="form-control mb-3" name="dataHoraLembreteTarefa" id="dataHoraLembrete" placeholder="Data e Hora da notificação">
+                            <label for="recorrenciaTarefa" class="form-label">Recorrência</label>
                             <select class="form-select mb-3" name="recorrenciaTarefa" id="recorrencia">
                                 <option value="0">Nenhuma</option>
                                 <option value="1">Diária</option>
                                 <option value="2">Semanal</option>
                                 <option value="3">Mensal</option>
                             </select>
+                            <label for="categoriaTarefa" class="form-label">Categoria</label>
                             <select class="form-select mb-3" name="categoriaTarefa" id="categoria" required>
                                 <option value="">Selecionar Categoria</option>
                                 <?php foreach ($categories as $category): ?>
@@ -198,7 +208,7 @@ if (isset($_GET['edit'])) {
             </thead>
             <tbody id="task-table-body">
                 <?php foreach ($tasks as $task): ?>
-                    <tr class="task-row" data-category="<?= $task['category_id'] ?>">
+                    <tr class="task-row" data-task-id="<?= $task['idTarefa'] ?>" data-category="<?= $task['category_id'] ?>">
                         <td><?= $task['statusTarefa'] ? 'Concluída' : 'Pendente' ?></td>
                         <td class="task-title"><?= $task['tituloTarefa'] ?></td>
                         <td><?= $task['descricaoTarefa'] ?></td>
@@ -220,7 +230,7 @@ if (isset($_GET['edit'])) {
                                 <a href="?status=<?= $task['idTarefa'] ?>" class="btn btn-success btn-sm">Concluir</a>
                             <?php endif; ?>
                             <button class="btn btn-warning btn-sm" onclick="editTask(<?= $task['idTarefa'] ?>, '<?= addslashes($task['tituloTarefa']) ?>', '<?= addslashes($task['descricaoTarefa']) ?>', '<?= $task['dataconclusao_date'] ?>', '<?= $task['datalembrete_date'] ?>', '<?= $task['recorrenciaTarefa'] ?>', '<?= $task['category_id'] ?>')">Editar</button>
-                            <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $task['idTarefa'] ?>)">Excluir</a>
+                            <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="deleteTask(<?= $task['idTarefa'] ?>)">Excluir</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -253,80 +263,92 @@ if (isset($_GET['edit'])) {
             myModal.show();
         }
 
-        function confirmDelete(taskId) {
-            // Exibe o pop-up de confirmação
-            if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
-                // Se o usuário confirmar, redireciona para a URL de exclusão
-                window.location.href = "?delete=" + taskId;
-            }
-        }
-
-        // Validação de tarefas vencidas
-        document.addEventListener('DOMContentLoaded', function() {
-    const tasks = <?= json_encode($tasks); ?>;  // Array de tarefas vindo do PHP
-    const currentDate = new Date();
-
-    tasks.forEach(task => {
-        const taskConclusionDate = new Date(task.dataconclusao_date);
-        
-        // Ajustar as horas, minutos e segundos para comparar apenas a data
-        taskConclusionDate.setHours(0, 0, 0, 0);
-        currentDate.setHours(0, 0, 0, 0);
-
-        // Verificar se a tarefa está vencida
-        if (taskConclusionDate < currentDate && task.statusTarefa == 0) {
-            // Verificar se o alerta já foi desativado para esta tarefa
-            if (!localStorage.getItem('alertDismissed_' + task.idTarefa)) {
-                // Exibir um alerta quando a tarefa estiver vencida e ainda não for concluída
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tarefa não concluída!',
-                    html: `
-                        <p>A tarefa "${task.tituloTarefa}" não foi concluída no prazo.</p>
-                        <label>
-                            <input type="checkbox" id="dontShowAgain_${task.idTarefa}" />
-                            Não mostrar mais esta mensagem 
-                        </label>
-                    `,
-                    confirmButtonText: 'OK',
-                    preConfirm: () => {
-                        // Se o checkbox estiver marcado, salvar no localStorage
-                        const dontShowAgain = document.getElementById('dontShowAgain_' + task.idTarefa).checked;
-                        if (dontShowAgain) {
-                            localStorage.setItem('alertDismissed_' + task.idTarefa, 'true');
-                        }
-                    }
-                });
-            }
-        }
-
-        // Verificar se a tarefa está a 1 dia do prazo (sem contar com as horas)
-        const oneDayBefore = new Date(taskConclusionDate);
-        oneDayBefore.setDate(oneDayBefore.getDate() - 1); // Subtrai 1 dia
-        
-        if (currentDate.toDateString() === oneDayBefore.toDateString() && task.statusTarefa == 0) {
-            // Exibir um alerta avisando que a tarefa está quase no prazo
-            Swal.fire({
-                icon: 'info',
-                title: 'O prazo está quase a acabar!',
-                html: `
-                    <p>A tarefa "${task.tituloTarefa}" está prestes a acabar amanhã!</p>
-                    <label>
-                        <input type="checkbox" id="dontShowAgainReminder_${task.idTarefa}" />
-                        Não mostrar mais esta mensagem 
-                    </label>
-                `,
-                confirmButtonText: 'OK',
-                preConfirm: () => {
-                    // Se o checkbox estiver marcado, salvar no localStorage
-                    const dontShowAgainReminder = document.getElementById('dontShowAgainReminder_' + task.idTarefa).checked;
-                    if (dontShowAgainReminder) {
-                        localStorage.setItem('alertDismissedReminder_' + task.idTarefa, 'true');
-                    }
+        function deleteTask(taskId) {
+    Swal.fire({
+        title: 'Você tem certeza?',
+        text: "Essa ação não pode ser desfeita!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`?delete=${taskId}`, {
+                method: 'GET',
+            })
+            .then(response => response.text())  // Resposta em texto
+            .then(data => {
+                // Seleciona a linha da tabela com base no ID da tarefa
+                const taskRow = document.querySelector(`tr[data-task-id="${taskId}"]`);
+                if (taskRow) {
+                    taskRow.remove();  // Remove a linha da tabela
+                    Swal.fire('Excluído!', 'A tarefa foi excluída com sucesso.', 'success');
+                } else {
+                    Swal.fire('Erro', 'Ocorreu um erro ao excluir a tarefa.', 'error');
                 }
+            })
+            .catch(error => {
+                Swal.fire('Erro', 'Ocorreu um erro. Tente novamente.', 'error');
             });
         }
     });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const tasks = <?= json_encode($tasks); ?>; // Array de tarefas vindo do PHP
+    const currentDate = new Date();
+
+    // Filtrar tarefas visíveis (ainda não ignoradas)
+    const visibleTasks = tasks.filter(task => !localStorage.getItem(`hideReminder_${task.idTarefa}`));
+
+    // Tarefas quase vencidas (1 dia antes do prazo)
+    const almostDueTasks = [];
+
+    visibleTasks.forEach(task => {
+        const taskConclusionDate = new Date(task.dataconclusao_date);
+        taskConclusionDate.setHours(0, 0, 0, 0);  // Ajusta para comparar apenas as datas
+        currentDate.setHours(0, 0, 0, 0);  // Ajusta para comparar apenas as datas
+
+        // Verificar se a tarefa está a 1 dia do prazo
+        const oneDayBefore = new Date(taskConclusionDate);
+        oneDayBefore.setDate(oneDayBefore.getDate() - 1);  // Subtrai 1 dia
+
+        if (currentDate.toDateString() === oneDayBefore.toDateString() && task.statusTarefa == 0) {
+            almostDueTasks.push(task);
+        }
+    });
+
+    // Se houver tarefas quase vencidas, exibe o alerta
+    if (almostDueTasks.length > 0) {
+        let htmlContent = '<p>Você tem tarefa(s) que vão expirar amanhã:</p>';
+
+        almostDueTasks.forEach(task => {
+            htmlContent += `
+                <div style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <strong>${task.tituloTarefa}</strong><br>
+                    <small>Prazo amanhã: ${task.dataconclusao_date}</small><br>
+                    <input type="checkbox" id="dont-show-almost-due-${task.idTarefa}">
+                    <label for="dont-show-almost-due-${task.idTarefa}">Não mostrar novamente para esta tarefa</label>
+                </div>
+            `;
+        });
+
+        Swal.fire({
+            title: 'Atenção',
+            html: htmlContent,
+            icon: 'info',
+            confirmButtonText: 'OK',
+            preConfirm: () => {
+                
+                almostDueTasks.forEach(task => {
+                    const checkbox = document.getElementById(`dont-show-almost-due-${task.idTarefa}`);
+                    if (checkbox && checkbox.checked) {
+                        localStorage.setItem(`hideReminder_${task.idTarefa}`, 'true');
+                    }
+                });
+            }
+        });
+    }
 });
 
     </script>

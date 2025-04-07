@@ -113,6 +113,15 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
     cursor: pointer; 
 }
 
+.delete-btn, .toggle-btn {
+    background: none;
+    border: none;
+    color: #000000; 
+    cursor: pointer;
+}
+
+
+
 .card-time { 
     font-size: 2rem; 
     text-align: center; 
@@ -126,15 +135,6 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
     color: #666; /* Cor mais suave para a legenda */
 }
 
-/* Ajustando a cor do botão de alternância do alarme */
-.toggle-btn i {
-    color: #000000; /* Ícones de alternância em preto */
-}
-
-/* Alterando a cor do botão de editar */
-.edit-btn i {
-    color: #000000; /* Ícone de editar em preto */
-}
 .alarm-notification {
     position: fixed;
     top: 20px;
@@ -189,41 +189,45 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
                 $timeLeftStr = sprintf("%02dh %02dm", $hoursLeft, $minutesLeft);
             ?>
             <div class="alarm-card" data-alarm-id="<?php echo $alarmId; ?>" data-alarm-time="<?php echo substr($alarmTime, 0, 5); ?>" data-alarm-active="<?php echo $active; ?>" data-alarm-days="<?php echo $daysOfWeek; ?>">
-                <div class="card-header">
-                    <span class="card-title"><?php echo $alarmTitle; ?></span>
-                    <div>
-                        <!-- Botão Editar -->
-                        <button class="edit-btn me-2" data-bs-toggle="modal" data-bs-target="#alarmModal"
-                                onclick="
-                                    document.getElementById('alarm_id').value='<?php echo $alarmId; ?>';
-                                    document.getElementById('alarm_title').value='<?php echo $alarmTitle; ?>';
-                                    document.getElementById('alarm_time').value='<?php echo substr($alarmTime, 0, 5); ?>';
-                                    document.getElementById('alarm_ringtone').value='<?php echo $ringtone; ?>';
-                                    let daysStr = '<?php echo $daysOfWeek; ?>';
-                                    document.querySelectorAll('#days_of_week_checkboxes input[type=checkbox]').forEach(ch => ch.checked = false);
-                                    if(daysStr) {
-                                        let arr = daysStr.split(',');
-                                        document.querySelectorAll('#days_of_week_checkboxes input[type=checkbox]').forEach(ch => {
-                                            if(arr.includes(ch.value)) { ch.checked = true; }
-                                        });
-                                    }
-                                    document.getElementById('alarm_active').checked = <?php echo $active ? 'true' : 'false'; ?>;
-                                ">
-                            <i class="fa fa-pen"></i>
-                        </button>
-                        <!-- Botão On/Off -->
-                        <a href="?toggle_alarm=<?php echo $alarmId; ?>" class="toggle-btn">
-                            <?php if ($active): ?>
-                                <i class="fa fa-toggle-on"></i>
-                            <?php else: ?>
-                                <i class="fa fa-toggle-off"></i>
-                            <?php endif; ?>
-                        </a>
-                    </div>
-                </div>
-                <div class="card-time"><?php echo substr($alarmTime, 0, 5); ?></div>
-                <div class="card-subtitle">Faltam <?php echo $timeLeftStr; ?> para tocar</div>
-            </div>
+    <div class="card-header">
+        <span class="card-title"><?php echo $alarmTitle; ?></span>
+        <div>
+            <!-- Botão Editar -->
+            <button class="edit-btn me-2" data-bs-toggle="modal" data-bs-target="#alarmModal"
+                    onclick="document.getElementById('alarm_id').value='<?php echo $alarmId; ?>';
+                            document.getElementById('alarm_title').value='<?php echo $alarmTitle; ?>';
+                            document.getElementById('alarm_time').value='<?php echo substr($alarmTime, 0, 5); ?>';
+                            document.getElementById('alarm_ringtone').value='<?php echo $ringtone; ?>';
+                            let daysStr = '<?php echo $daysOfWeek; ?>';
+                            document.querySelectorAll('#days_of_week_checkboxes input[type=checkbox]').forEach(ch => ch.checked = false);
+                            if(daysStr) {
+                                let arr = daysStr.split(',');
+                                document.querySelectorAll('#days_of_week_checkboxes input[type=checkbox]').forEach(ch => {
+                                    if(arr.includes(ch.value)) { ch.checked = true; }
+                                });
+                            }
+                            document.getElementById('alarm_active').checked = <?php echo $active ? 'true' : 'false'; ?>;">
+                <i class="fa fa-pen"></i>
+            </button>
+            <!-- Botão Deletar -->
+            <button class="delete-btn" onclick="deleteAlarm(<?php echo $alarmId; ?>)">
+    <i class="fa fa-trash"></i>
+</button>
+
+            <!-- Botão On/Off -->
+            <a href="?toggle_alarm=<?php echo $alarmId; ?>" class="toggle-btn">
+                <?php if ($active): ?>
+                    <i class="fa fa-toggle-on"></i>
+                <?php else: ?>
+                    <i class="fa fa-toggle-off"></i>
+                <?php endif; ?>
+            </a>
+        </div>
+    </div>
+    <div class="card-time"><?php echo substr($alarmTime, 0, 5); ?></div>
+    <div class="card-subtitle">Faltam <?php echo $timeLeftStr; ?> para tocar</div>
+</div>
+
             <?php endforeach; ?>
         </div>
     </div>
@@ -347,6 +351,39 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
             dismissAlarm();
         }
         window.addEventListener('DOMContentLoaded', initAlarms);
+
+        function deleteAlarm(alarmId) {
+    Swal.fire({
+        title: 'Você tem certeza?',
+        text: "Essa ação não pode ser desfeita!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Fazendo o fetch para excluir o alarme
+            fetch(`?delete_alarm=${alarmId}`, {
+                method: 'GET',
+            })
+            .then(response => response.text()) // Aqui usamos text, mas pode ser JSON se preferir
+            .then(data => {
+                // Seleciona a linha do alarme na tabela para removê-la
+                const alarmRow = document.querySelector(`.alarm-card[data-alarm-id="${alarmId}"]`);
+                if (alarmRow) {
+                    alarmRow.remove(); // Remove o alarme da visualização
+                    Swal.fire('Excluído!', 'O alarme foi excluído com sucesso.', 'success');
+                } else {
+                    Swal.fire('Erro', 'Ocorreu um erro ao excluir o alarme.', 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('Erro', 'Ocorreu um erro. Tente novamente.', 'error');
+            });
+        }
+    });
+}
+
     </script>
 
     <!-- Notificação de Alarme -->
@@ -370,6 +407,9 @@ $alarms = $alarmsQuery->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
 </html>
 

@@ -113,7 +113,7 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
     <?php include 'sidebar.php'; ?>
 
     <div id="main-content">
-    <h1 class="mb-4">Temporizador</h1>
+        <h1 class="mb-4">Temporizador</h1>
         <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#timerModal"
                 onclick="document.getElementById('timer_id').value=''; document.getElementById('timer_name').value=''; document.getElementById('timer_hours').value='00'; document.getElementById('timer_minutes').value='00'; document.getElementById('timer_seconds').value='00';">
             <i class="fa fa-plus"></i> Criar Temporizador
@@ -140,9 +140,9 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
                                          document.getElementById('timer_seconds').value='<?php echo str_pad($seconds, 2, '0', STR_PAD_LEFT); ?>';">
                             <i class="fa fa-pen"></i>
                         </button>
-                        <a href="?delete_timer=<?php echo $timerId; ?>" class="toggle-btn">
+                        <button class="toggle-btn delete-btn" onclick="deleteTimer(<?php echo $timerId; ?>)">
                             <i class="fa fa-trash"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>
                 <div class="timer-display"><?php echo str_pad($hours, 2, '0', STR_PAD_LEFT); ?>:<?php echo str_pad($minutes, 2, '0', STR_PAD_LEFT); ?>:<?php echo str_pad($seconds, 2, '0', STR_PAD_LEFT); ?></div>
@@ -193,7 +193,40 @@ $timers = $timersQuery->fetchAll(PDO::FETCH_ASSOC);
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function deleteTimer(timerId) {
+            Swal.fire({
+                title: 'Você tem certeza?',
+                text: "Essa ação não pode ser desfeita!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Fazendo o fetch para excluir o temporizador
+                    fetch(`?delete_timer=${timerId}`, {
+                        method: 'GET',
+                    })
+                    .then(response => response.text()) // Retorna "success"
+                    .then(data => {
+                        // Seleciona o temporizador e remove ele da visualização
+                        const timerRow = document.querySelector(`.timer-card[data-timer-id="${timerId}"]`);
+                        if (timerRow) {
+                            timerRow.remove(); // Remove o temporizador da visualização
+                            Swal.fire('Excluído!', 'O temporizador foi excluído com sucesso.', 'success');
+                        } else {
+                            Swal.fire('Erro', 'Ocorreu um erro ao excluir o temporizador.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Erro', 'Ocorreu um erro. Tente novamente.', 'error');
+                    });
+                }
+            });
+        }
+
         let timerData = {};
         function initTimers() {
             const timerCards = document.querySelectorAll('.timer-card');

@@ -54,19 +54,6 @@ $userName = htmlspecialchars($user['name'] ?? 'Usuário');
             z-index: 2;
         }
 
-        #open_btn {
-            position: absolute;
-            top: 30px;
-            right: -10px;
-            background-color: #71b9f0;
-            color: #e3e9f7;
-            border-radius: 100%;
-            width: 20px;
-            height: 20px;
-            border: none;
-            cursor: pointer;
-        }
-
         #sidebar_content {
             padding: 12px;
         }
